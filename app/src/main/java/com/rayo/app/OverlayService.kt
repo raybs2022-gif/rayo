@@ -289,6 +289,46 @@ class OverlayService : Service() {
         }
 
         @JavascriptInterface
+        fun copy(text: String) {
+            handler.post {
+                try {
+                    val cm = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                    cm.setPrimaryClip(android.content.ClipData.newPlainText("Rayo", text))
+                } catch (e: Exception) { }
+            }
+        }
+
+        @JavascriptInterface
+        fun openApp(name: String): String {
+            return try {
+                val pm = packageManager
+                val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+                val apps = pm.queryIntentActivities(intent, 0)
+                val q = name.trim().lowercase()
+                var best: android.content.pm.ResolveInfo? = null
+                for (r in apps) {
+                    val label = r.loadLabel(pm).toString().lowercase()
+                    if (label == q) { best = r; break }
+                    if (best == null && q.length >= 3 && label.contains(q)) best = r
+                }
+                if (best == null) {
+                    ""
+                } else {
+                    val launch = pm.getLaunchIntentForPackage(best.activityInfo.packageName)
+                    if (launch == null) {
+                        ""
+                    } else {
+                        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        handler.post { try { startActivity(launch) } catch (e: Exception) { } }
+                        best.loadLabel(pm).toString()
+                    }
+                }
+            } catch (e: Exception) {
+                ""
+            }
+        }
+
+        @JavascriptInterface
         fun quit() { handler.post { stopSelf() } }
     }
 

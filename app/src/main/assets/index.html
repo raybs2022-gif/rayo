@@ -153,6 +153,10 @@ form{border-top:1px solid rgba(var(--nr),.25)!important;background:rgba(0,0,0,.2
 #pet::before{content:"";position:absolute;left:50%;top:60%;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;background:radial-gradient(circle,rgba(var(--nr),.3),rgba(var(--nr),0) 68%);pointer-events:none}
 #pet .ring{stroke:var(--neon)!important;filter:drop-shadow(0 0 3px var(--neon))}
 #pet svg circle[r="40"]{stroke:var(--neon);stroke-width:1.4}
+.m{-webkit-user-select:text;user-select:text;position:relative}
+.m.bot{padding-right:34px}
+.m .cp{position:absolute;right:6px;bottom:6px;border:1px solid rgba(var(--nr),.4);background:rgba(var(--nr),.1);color:var(--text);border-radius:8px;width:24px;height:24px;font-size:.8rem;line-height:1;padding:0}
+.pic{max-width:100%;border-radius:10px;margin-top:6px;display:block;cursor:pointer;border:1px solid rgba(var(--nr),.3)}
 </style></head><body>
 <div id="panel">
   <div class="head"><div><b>RAYO ⚡</b><small id="sub"></small></div><button id="voz" aria-label="Voz" title="Voz de Rayo">🗣️</button><button id="snd" aria-label="Sonido" title="Sonido y vibración">🔊</button><button id="cfgb" aria-label="Ajustes" title="Ajustes">⚙️</button><button id="walk" aria-label="Paseo" title="Paseo">🏃</button><button id="x" aria-label="Cerrar">✕</button></div>
@@ -168,7 +172,7 @@ form{border-top:1px solid rgba(var(--nr),.25)!important;background:rgba(0,0,0,.2
     <div class="card"><h4>Voz e inicio</h4><label class="chk"><input type="checkbox" id="ctts"> Leer las respuestas en voz alta</label><label class="chk"><input type="checkbox" id="cauto"> Iniciar Rayo al prender el celular</label></div>
     <div class="card"><h4>Seguridad</h4><label>PIN para abrir ajustes (4 a 6 dígitos, vacío = sin PIN)</label><input id="cpin" type="password" inputmode="numeric" maxlength="6"></div>
     <button type="button" class="b1" id="csave">Guardar ajustes</button>
-    <div class="card" style="margin-top:12px"><h4>Lo que sé de ti</h4><div id="memlist"></div><button type="button" class="b2" id="cclearmem">Borrar mi memoria</button><button type="button" class="b2" id="cclearhist">Borrar la conversación</button><p class="h">Para enseñarme algo al instante escribe «Aprende: …». Para quitarlo, «Olvida: …».</p></div>
+    <div class="card" style="margin-top:12px"><h4>Lo que sé de ti</h4><div id="memlist"></div><button type="button" class="b2" id="ccopyall">Copiar toda la conversación</button><button type="button" class="b2" id="cclearmem">Borrar mi memoria</button><button type="button" class="b2" id="cclearhist">Borrar la conversación</button><p class="h">Para enseñarme algo al instante escribe «Aprende: …». Para quitarlo, «Olvida: …».</p></div>
     <div class="card"><h4>Libreta personal</h4><p class="h">Pega aquí textos largos (normas, apuntes, procedimientos). Los uso cuando tu pregunta se relaciona.</p><textarea id="cnotes"></textarea><button type="button" class="b2" id="csavenotes">Guardar libreta</button><p class="h" id="bkmsg2"></p></div>
     <div class="card"><h4>Copia de seguridad</h4><p class="h">Genera una copia de tu memoria, libreta y progreso para no perderla si reinstalas. No incluye tus claves.</p><textarea id="bk" placeholder="Aquí aparece la copia, o pega una para restaurar"></textarea><button type="button" class="b2" id="bkgen">Generar copia</button><button type="button" class="b2" id="bkres">Restaurar</button><p class="h" id="bkmsg"></p></div>
    </div>
@@ -267,7 +271,11 @@ function fmt(t){
   var parts=String(t).split(/```(?:\w+)?\n?/),out='';
   for(var i=0;i<parts.length;i++){
     if(i%2){out+='<pre><code>'+esc(parts[i])+'</code></pre>';continue}
-    var h=esc(parts[i]).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/^\s*[-*] (.*)$/gm,'• $1');
+    var h=esc(parts[i])
+      .replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g,function(m,al,u){return '<img class="pic" alt="'+al.replace(/"/g,'')+'" src="'+u+'" data-u="'+u+'">'})
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,function(m,tx,u){return '<a href="#" data-u="'+u+'">'+tx+'</a>'})
+      .replace(/(?<![="'>])(https?:\/\/[^\s<)]+)/g,function(m){var tail='';while(/[.,;:!?]$/.test(m)){tail=m.slice(-1)+tail;m=m.slice(0,-1)}return '<a href="#" data-u="'+m+'">'+m+'</a>'+tail})
+      .replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/^\s*[-*] (.*)$/gm,'• $1');
     out+=h.split(/\n{2,}/).map(function(b){return b.trim()?'<p>'+b.replace(/\n/g,'<br>')+'</p>':''}).join('');
   }
   return out;
@@ -324,7 +332,7 @@ async function wiki(t){
   var m=await getJSON('https://es.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(r.title));
   var u=(m.content_urls&&m.content_urls.mobile&&m.content_urls.mobile.page)||('https://es.wikipedia.org/wiki/'+encodeURIComponent(r.title));
   return {t:'Wikipedia, "'+(m.title||r.title)+'": '+String(m.extract||'').slice(0,700),
-   h:'<p><b>'+esc(m.title||r.title)+'</b></p><p>'+esc(m.extract||'')+'</p><div class="src">Fuente: Wikipedia · <a href="#" data-u="'+esc(u)+'">Ver artículo</a></div>'};
+   h:'<p><b>'+esc(m.title||r.title)+'</b></p>'+(m.thumbnail&&m.thumbnail.source?'<img class="pic" src="'+esc(m.thumbnail.source)+'" data-u="'+esc(u)+'">':'')+'<p>'+esc(m.extract||'')+'</p><div class="src">Fuente: Wikipedia · <a href="#" data-u="'+esc(u)+'">Ver artículo</a></div>'};
 }
 async function run(kind,text){
   if(busy)return;busy=true;sb.disabled=true;
@@ -389,7 +397,7 @@ function sys(t){
   var s='Eres Rayo, una mascota flotante veloz y futurista, inspirada en los superhéroes velocistas. Conversas como un amigo inteligente y cercano. Respondes en el idioma del usuario (por defecto español), claro, cálido y directo; breve salvo que pidan detalle. Puedes explicar, aconsejar, redactar, traducir, calcular y dar ideas sobre casi cualquier tema. No inventes datos: si no sabes algo, dilo. '+
   'Fecha y hora en Lima, Perú: '+ahora+'. '+
   'Si el mensaje trae un bloque [DATOS DE INTERNET], úsalo para los datos actuales y menciona la fuente; si no alcanza, dilo con honestidad. Sin ese bloque no tienes datos en tiempo real. '+
-  'En temas médicos, legales o financieros informa y sugiere consultar a un profesional. Formato: texto sencillo, **negrita** y listas con guiones. ';
+  'En temas médicos, legales o financieros informa y sugiere consultar a un profesional. Formato: texto sencillo, **negrita** y listas con guiones. Puedes incluir enlaces con el formato [texto](https://...). Si piden videos, da un enlace de búsqueda de YouTube (https://www.youtube.com/results?search_query=...). Si piden imágenes, dile que escriba «imagen de …». Si piden abrir una app, dile que escriba «abre …». ';
   if(mode==='ingles')s+='MODO PROFESOR DE INGLÉS: conversa con el usuario en inglés sencillo y claro, adaptado a su nivel (pregúntaselo si no lo sabes). Pon la traducción al español entre paréntesis solo cuando haga falta. Si comete errores, corrígelos con amabilidad mostrando la frase corregida y una explicación corta. Termina casi siempre con una pregunta para que siga practicando. Si pide la palabra del día, dale una palabra con ejemplo y traducción. ';
   s+=mem.length?'LO QUE SABES DEL USUARIO (úsalo con naturalidad, sin recitarlo): '+mem.join('; ')+'. ':'Aún no conoces al usuario: si surge de forma natural, pregúntale su nombre y a qué se dedica. Si le preguntaste su nombre y responde con una sola palabra, esa palabra ES su nombre: salúdalo por su nombre y continúa sin volver a presentarte. ';
   var n=notasRel(t||'');if(n)s+='DATOS DE SU LIBRETA PERSONAL (úsalos si ayudan): '+n+' ';
@@ -485,6 +493,30 @@ function setMode(m){
     respond('Start our English lesson: greet me in one short sentence, ask my level (beginner, intermediate or advanced) in one short question, and give me the word of the day with an example. Add the Spanish translation in parentheses.');
   }else add('bot','Volví al modo normal. ¿En qué te ayudo?',true);
 }
+async function imagenes(term){
+  var b=typing();
+  try{
+    var j=await getJSON('https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrlimit=8&gsrsearch='+encodeURIComponent(term+' filetype:bitmap')+'&prop=imageinfo&iiprop=url|mime&iiurlwidth=500&format=json&origin=*');
+    var pg=j.query&&j.query.pages?Object.keys(j.query.pages).map(function(k){return j.query.pages[k]}):[];
+    var im=pg.filter(function(x){var i=x.imageinfo&&x.imageinfo[0];return i&&/jpeg|png/.test(i.mime||'')}).slice(0,4);
+    if(!im.length){b.textContent='No encontré imágenes de «'+term+'». Prueba con otras palabras.';return}
+    var h='<p><b>Imágenes de '+esc(term)+'</b></p>';
+    im.forEach(function(x){var i=x.imageinfo[0];h+='<img class="pic" src="'+esc(i.thumburl||i.url)+'" data-u="'+esc(i.descriptionurl||i.url)+'">'});
+    b.innerHTML=h+'<div class="src">Fuente: Wikimedia Commons. Toca una imagen para abrirla.</div>';SND.recv();
+  }catch(e){b.textContent='No pude cargar imágenes. Revisa tu conexión.';SND.err()}
+  log.scrollTop=log.scrollHeight;
+}
+function videos(term){
+  var u='https://www.youtube.com/results?search_query='+encodeURIComponent(term);
+  add('bot','<p><b>Videos de '+esc(term)+'</b></p><p><a href="#" data-u="'+esc(u)+'">▶ Ver videos de «'+esc(term)+'» en YouTube</a></p><div class="src">Se abre en la app de YouTube o en tu navegador.</div>');SND.recv();
+}
+var SITIOS={youtube:'https://www.youtube.com',google:'https://www.google.com',gmail:'https://mail.google.com',maps:'https://maps.google.com',whatsapp:'https://web.whatsapp.com',facebook:'https://www.facebook.com',instagram:'https://www.instagram.com',tiktok:'https://www.tiktok.com',spotify:'https://open.spotify.com',netflix:'https://www.netflix.com',wikipedia:'https://es.wikipedia.org'};
+function abrirApp(name){
+  var n='';try{if(typeof A.openApp==='function')n=A.openApp(name)||''}catch(e){}
+  if(n){add('bot','Abriendo «'+n+'»… ⚡',true);SND.zap();buzz(20);return true}
+  var k=name.toLowerCase();if(SITIOS[k]){add('bot','No encontré esa app, pero abro su página web. ⚡',true);A.open(SITIOS[k]);return true}
+  return false;
+}
 async function ask(t){
   t=t.trim();if(!t||busy)return;
   add('me',t,true);q.value='';SND.send();
@@ -492,6 +524,9 @@ async function ask(t){
   if((m=t.match(/^aprende:?\s+(.+)/i))){aprendeManual(m[1]);return}
   if((m=t.match(/^olvida:?\s+(.+)/i))){olvida(m[1]);return}
   if(/^¿?\s*(qu[eé] sabes de m[ií]|qu[eé] recuerdas de m[ií]|mi memoria)\s*\??$/i.test(t)){listaMem();return}
+  if((m=t.match(/^(?:mu[eé]strame|ens[eé][ñn]ame|busca|dame|ver|quiero ver|pon)?\s*(?:una |unas |unos |la |las |el |los )?(?:im[aá]genes|imagen|fotos|foto)\s+(?:de|del|de la|de los|de las)\s+(.+)/i))){imagenes(m[1].replace(/[?¿.!]+$/,''));return}
+  if((m=t.match(/^(?:mu[eé]strame|ens[eé][ñn]ame|busca|dame|ver|quiero ver|pon)?\s*(?:un |unos |el |los )?(?:v[ií]deos|v[ií]deo)\s+(?:de|del|sobre|de la|de los|de las)\s+(.+)/i))){videos(m[1].replace(/[?¿.!]+$/,''));return}
+  if((m=t.match(/^(?:abre|abrir|abreme|ábreme|lanza|ir a|vamos a)\s+(?:la app de |la aplicaci[oó]n de |la app |el |la )?(.+)$/i))&&abrirApp(m[1].replace(/[?¿.!]+$/,'').trim()))return;
   if(/^\/?(modo )?ingl[eé]s$/i.test(t)){setMode('ingles');return}
   if(/^\/?(modo )?normal$/i.test(t)){setMode('normal');return}
   if(!cfg.key){sinClave(t);return}
@@ -529,6 +564,7 @@ $('#ctts').onchange=function(){ttsOn=this.checked;ss('rayo_tts',ttsOn);paintVoz(
 $('#cauto').onchange=function(){try{if(typeof A.setAutostart==='function')A.setAutostart(this.checked)}catch(e){}};
 $('#cgroq').onclick=function(){A.open('https://console.groq.com/keys')};
 $('#cor').onclick=function(){A.open('https://openrouter.ai/keys')};
+$('#ccopyall').onclick=function(){copyText(hist.map(function(m){return (m.role==='user'?'Yo: ':'Rayo: ')+m.content}).join('\n\n'));this.textContent='✓ Copiado';var b=this;setTimeout(function(){b.textContent='Copiar toda la conversación'},1500)};
 $('#cclearmem').onclick=function(){mem=[];ss('rayo_mem',mem);renderMem()};
 $('#cclearhist').onclick=function(){hist=[];ss('rayo_hist',hist);log.innerHTML='';panel.classList.remove('cfgmode');welcome()};
 $('#bkgen').onclick=function(){
@@ -560,7 +596,16 @@ $('#lgo').onclick=function(){
 };
 
 // ---------- Interfaz ----------
-log.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-u]');if(a){e.preventDefault();A.open(a.getAttribute('data-u'))}});
+log.addEventListener('click',function(e){
+  var cp=e.target.closest&&e.target.closest('.cp');
+  if(cp){e.preventDefault();var m=cp.parentNode,c=m.cloneNode(true),x=c.querySelector('.cp');if(x)x.remove();copyText((c.innerText||c.textContent||'').trim());cp.textContent='✓';setTimeout(function(){cp.textContent='⧉'},1200);return}
+  var a=e.target.closest&&e.target.closest('a[data-u],img[data-u]');if(a){e.preventDefault();A.open(a.getAttribute('data-u'))}
+});
+new MutationObserver(function(){[].forEach.call(log.querySelectorAll('.m.bot'),function(m){if(!m.querySelector('.cp')&&!m.querySelector('.dots')&&(m.textContent||m.querySelector('img'))){var b=document.createElement('button');b.type='button';b.className='cp';b.title='Copiar';b.textContent='⧉';m.appendChild(b)}})}).observe(log,{childList:true,subtree:true,characterData:true});
+function copyText(t){
+  try{if(typeof A.copy==='function'){A.copy(t);return}}catch(e){}
+  try{var p=navigator.clipboard&&navigator.clipboard.writeText(t);if(p&&p.catch)p.catch(function(){})}catch(e){}
+}
 f.addEventListener('submit',function(e){e.preventDefault();ask(q.value)});
 function nombre(){for(var i=0;i<mem.length;i++){var m=mem[i].match(/(?:llama|nombre es|es)\s+([A-ZÁÉÍÓÚÑ][\wáéíóúñ]+)/);if(m)return m[1]}return ''}
 function saludo(){var h=+new Date().toLocaleString('en-US',{timeZone:'America/Lima',hour:'numeric',hour12:false});return h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'}
