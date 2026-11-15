@@ -87,10 +87,34 @@ body.open #pet{align-self:flex-end;margin-top:4px}
 .mi{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem}
 .mi button{border:0;background:transparent;color:var(--text);opacity:.6;font-size:1rem}
 #memlist{margin-bottom:6px;opacity:.95}
+
+.head button{width:28px!important;height:28px!important;font-size:.9rem!important}
+.m{animation:mIn .22s ease-out}
+@keyframes mIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.dots i{display:inline-block;width:7px;height:7px;margin:0 2px;border-radius:50%;background:currentColor;opacity:.3;animation:dot 1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes dot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+#cfg .chk{display:flex;gap:8px;align-items:center;margin:0 0 12px;font-size:.88rem;opacity:1}
+#cfg .chk input{width:20px;height:20px;padding:0}
+#pet.walk .wing{animation-duration:.3s}
+#pet.dash .wing{animation-duration:.14s}
+#pet.dash .aura{animation-duration:.35s}
+#pet.dash .arc{animation-duration:.25s}
+#pet.dash svg{filter:drop-shadow(0 0 6px #ffb02e) drop-shadow(0 0 12px #ff7a1a)}
+#pet.think .ring{animation-duration:.8s}
+#pet.think .aura{animation-duration:.5s}
+#pet.drag svg{filter:drop-shadow(0 0 8px #ffd34d)}
+#pet.land svg{animation:squash .5s ease-out}
+@keyframes squash{0%{transform:scale(1.18,.8)}35%{transform:scale(.92,1.12)}65%{transform:scale(1.04,.97)}100%{transform:scale(1)}}
+#pet::after{content:"";position:absolute;left:50%;top:60%;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;border:3px solid rgba(255,211,77,.9);opacity:0;pointer-events:none}
+#pet.land::after{animation:shock .55s ease-out}
+@keyframes shock{0%{transform:scale(.5);opacity:.9}100%{transform:scale(1.9);opacity:0}}
+#pet.happy{animation:hop .6s ease-out}
+@keyframes hop{0%{transform:translateY(0)}40%{transform:translateY(-14px) scale(1.06)}100%{transform:translateY(0)}}
 </style></head><body>
 <div id="panel">
-  <div class="head"><div><b>Rayo ⚡</b><small>Conversa, busca y aprende</small></div><button id="cfgb" aria-label="Ajustes" title="Ajustes">⚙️</button><button id="walk" aria-label="Paseo" title="Paseo">🏃</button><button id="x" aria-label="Cerrar">✕</button></div>
-  <div id="cfg"><p><b>Cerebro de IA (gratis)</b></p><p class="h">1) Pulsa «Abrir Groq», crea tu cuenta y en <i>API Keys</i> crea una clave.<br>2) Cópiala y pégala aquí abajo.</p><button type="button" class="b2" id="cgroq">Abrir Groq</button><label>Clave</label><input id="ckey" type="password" autocomplete="off" placeholder="gsk_..."><label>Modelo</label><input id="cmodel" autocomplete="off"><label>Dirección de la IA</label><input id="curl" autocomplete="off"><button type="button" class="b1" id="csave">Guardar</button><p><b>Lo que sé de ti</b></p><div id="memlist"></div><button type="button" class="b2" id="cclearmem">Borrar mi memoria</button><button type="button" class="b2" id="cclearhist">Borrar la conversación</button></div>
+  <div class="head"><div><b>Rayo ⚡</b><small>Conversa, busca y aprende</small></div><button id="snd" aria-label="Sonido" title="Sonido y vibración">🔊</button><button id="cfgb" aria-label="Ajustes" title="Ajustes">⚙️</button><button id="walk" aria-label="Paseo" title="Paseo">🏃</button><button id="x" aria-label="Cerrar">✕</button></div>
+  <div id="cfg"><p class="h" id="streak"></p><label class="chk"><input type="checkbox" id="ctts"> Leer las respuestas en voz alta</label><p><b>Cerebro de IA (gratis)</b></p><p class="h">1) Pulsa «Abrir Groq», crea tu cuenta y en <i>API Keys</i> crea una clave.<br>2) Cópiala y pégala aquí abajo.</p><button type="button" class="b2" id="cgroq">Abrir Groq</button><label>Clave</label><input id="ckey" type="password" autocomplete="off" placeholder="gsk_..."><label>Modelo</label><input id="cmodel" autocomplete="off"><label>Dirección de la IA</label><input id="curl" autocomplete="off"><button type="button" class="b1" id="csave">Guardar</button><p><b>Lo que sé de ti</b></p><div id="memlist"></div><button type="button" class="b2" id="cclearmem">Borrar mi memoria</button><button type="button" class="b2" id="cclearhist">Borrar la conversación</button></div>
   <div class="quick" id="quick"></div>
   <div id="log"></div>
   <form id="f"><input id="q" placeholder="Pregunta o busca algo…" autocomplete="off"><button class="send" id="s">➤</button></form>
@@ -130,6 +154,29 @@ panel.style.display='none';
 function $(s){return document.querySelector(s)}
 function ls(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
 function ss(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+var soundOn=ls('rayo_snd',true),ttsOn=ls('rayo_tts',false),AC=null,lastLean=0;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended'){try{AC.resume()}catch(e){}}return AC}
+function tone(f1,f2,dur,type,vol,delay){var c=ac();if(!c||!soundOn)return;try{var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(Math.max(1,f2),t+dur);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime((vol||.2)*.6,t+.012);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+.03)}catch(e){}}
+function noise(dur,f1,f2,vol){var c=ac();if(!c||!soundOn)return;try{var n=Math.floor(c.sampleRate*dur),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);for(var i=0;i<n;i++)d[i]=Math.random()*2-1;var s=c.createBufferSource();s.buffer=b;var fl=c.createBiquadFilter();fl.type='bandpass';fl.Q.value=1.2;var t=c.currentTime;fl.frequency.setValueAtTime(f1,t);fl.frequency.exponentialRampToValueAtTime(Math.max(20,f2),t+dur);var g=c.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime((vol||.2)*.6,t+dur*.25);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);s.connect(fl);fl.connect(g);g.connect(c.destination);s.start(t)}catch(e){}}
+var SND={
+ pop:function(){tone(420,900,.09,'sine',.25);tone(900,1300,.07,'sine',.15,.07)},
+ close:function(){tone(900,380,.1,'sine',.22)},
+ send:function(){tone(700,1000,.06,'triangle',.18)},
+ recv:function(){tone(660,660,.12,'sine',.22);tone(990,990,.18,'sine',.2,.1)},
+ err:function(){tone(220,140,.22,'sawtooth',.14)},
+ whoosh:function(){noise(.45,300,3200,.35);tone(200,900,.3,'sawtooth',.08)},
+ step:function(){noise(.18,800,1800,.12)},
+ soft:function(){tone(180,90,.12,'sine',.18)},
+ land:function(){tone(150,45,.22,'sine',.4);noise(.12,600,200,.2)},
+ grab:function(){tone(520,780,.07,'square',.1)},
+ drop:function(){tone(300,100,.14,'sine',.3)},
+ zap:function(){noise(.2,1500,6000,.25);tone(1800,300,.18,'sawtooth',.1)}
+};
+function buzz(ms){if(soundOn&&typeof A.vibrate==='function'){try{A.vibrate(ms)}catch(e){}}}
+function speak(t){if(!ttsOn||!window.speechSynthesis)return;try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(String(t).replace(/[*`#•]/g,'').slice(0,600));u.lang='es-ES';u.rate=1.05;speechSynthesis.speak(u)}catch(e){}}
+var days=ls('rayo_days',[]),today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Lima'});
+if(days[days.length-1]!==today){days.push(today);days=days.slice(-90);ss('rayo_days',days)}
+function racha(){var n=0,d=new Date(today+'T12:00:00Z');for(var i=days.length-1;i>=0;i--){if(days[i]===d.toISOString().slice(0,10)){n++;d.setUTCDate(d.getUTCDate()-1)}else break}return n}
 var cfg=ls('rayo_cfg',{key:'',model:'openai/gpt-oss-120b',url:'https://api.groq.com/openai/v1/chat/completions'});
 var mem=ls('rayo_mem',[]),hist=ls('rayo_hist',[]),nuser=ls('rayo_n',0),tip=false;
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
@@ -142,6 +189,7 @@ function fmt(t){
   }
   return out;
 }
+function typing(){var d=document.createElement('div');d.className='m bot';d.innerHTML='<span class="dots"><i></i><i></i><i></i></span>';log.appendChild(d);log.scrollTop=log.scrollHeight;return d}
 function add(role,html,isText){var d=document.createElement('div');d.className='m '+role;if(isText)d.textContent=html;else d.innerHTML=html;log.appendChild(d);log.scrollTop=log.scrollHeight;return d}
 function hora(ms){try{return new Date(ms).toLocaleString('es-PE',{timeZone:'America/Lima',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}catch(e){return ''}}
 async function getJSON(u){var r=await fetch(u);if(!r.ok)throw new Error('http '+r.status);return r.json()}
@@ -188,9 +236,9 @@ async function wiki(t){
 }
 async function run(kind,text){
   if(busy)return;busy=true;sb.disabled=true;
-  var b=add('bot','Buscando a la velocidad de la luz…',true);
-  try{var r=await (kind==='dolar'?dolar():kind==='clima'?clima():kind==='noticias'?noticias():kind==='sismos'?sismos():wiki(text));b.innerHTML=r.h}
-  catch(e){b.textContent='No pude conectarme a internet. Revisa tu conexión e inténtalo otra vez.'}
+  var b=typing();
+  try{var r=await (kind==='dolar'?dolar():kind==='clima'?clima():kind==='noticias'?noticias():kind==='sismos'?sismos():wiki(text));b.innerHTML=r.h;SND.recv()}
+  catch(e){b.textContent='No pude conectarme a internet. Revisa tu conexión e inténtalo otra vez.';SND.err()}
   finally{busy=false;sb.disabled=false;log.scrollTop=log.scrollHeight}
 }
 
@@ -251,24 +299,42 @@ function sinClave(t){
   else if(/sismo|temblor/.test(l))run('sismos');
   else run('wiki',t);
 }
-async function ask(t){
-  t=t.trim();if(!t||busy)return;
-  add('me',t,true);q.value='';
-  if(!cfg.key){sinClave(t);return}
-  busy=true;sb.disabled=true;
-  var b=add('bot','Pensando a la velocidad de la luz…',true);
+async function respond(t,ctxOver){
+  busy=true;sb.disabled=true;pet.classList.add('think');
+  var b=typing();
   try{
-    var ctx=await contexto(t);
+    var ctx=ctxOver!==undefined?ctxOver:await contexto(t);
     var msgs=[{role:'system',content:sys()}].concat(hist.slice(-8),[{role:'user',content:ctx?t+'\n\n[DATOS DE INTERNET]\n'+ctx:t}]);
     var out=await llm(msgs,1200,0.6);
     if(!out)out=await llm(msgs,2500,0.6);
     if(!out)out='No pude armar una respuesta. Intenta de nuevo.';
     b.innerHTML=fmt(out);
+    SND.recv();buzz(20);speak(out);
+    pet.classList.add('happy');setTimeout(function(){pet.classList.remove('happy')},700);
     hist.push({role:'user',content:t},{role:'assistant',content:out});hist=hist.slice(-30);ss('rayo_hist',hist);
     busy=false;sb.disabled=false;
     aprender(t,out);
-  }catch(e){b.textContent=errMsg(e)}
-  finally{busy=false;sb.disabled=false;log.scrollTop=log.scrollHeight}
+  }catch(e){b.textContent=errMsg(e);SND.err()}
+  finally{busy=false;sb.disabled=false;pet.classList.remove('think');log.scrollTop=log.scrollHeight}
+}
+async function ask(t){
+  t=t.trim();if(!t||busy)return;
+  add('me',t,true);q.value='';SND.send();
+  if(!cfg.key){sinClave(t);return}
+  respond(t);
+}
+async function miDia(){
+  if(busy)return;
+  add('me','☀️ Mi día',true);SND.send();
+  if(!cfg.key){
+    busy=true;var b=typing();
+    try{var r=await Promise.all([clima().catch(function(){return null}),dolar().catch(function(){return null}),noticias().catch(function(){return null})]);b.innerHTML=r.filter(Boolean).map(function(x){return x.h}).join('<hr>')||'No pude conectarme a internet.';SND.recv()}
+    finally{busy=false;log.scrollTop=log.scrollHeight}
+    return;
+  }
+  var r=await Promise.all([clima().catch(function(){return null}),dolar().catch(function(){return null}),noticias().catch(function(){return null})]);
+  var ctx=r.filter(Boolean).map(function(x){return x.t}).join('\n\n').slice(0,2500);
+  respond('Hazme mi resumen del día: salúdame según la hora, dime el clima de Lima, el dólar, tres titulares importantes de Perú y un consejo breve para hoy.',ctx);
 }
 
 // ---------- Ajustes y memoria ----------
@@ -277,12 +343,13 @@ function renderMem(){
   if(!mem.length){box.textContent='Todavía no sé nada de ti. Cuéntame de ti y lo iré aprendiendo.';return}
   mem.forEach(function(x,i){var d=document.createElement('div');d.className='mi';var s=document.createElement('span');s.textContent=x;var b=document.createElement('button');b.type='button';b.textContent='✕';b.onclick=function(){mem.splice(i,1);ss('rayo_mem',mem);renderMem()};d.appendChild(s);d.appendChild(b);box.appendChild(d)});
 }
-function loadCfg(){$('#ckey').value=cfg.key||'';$('#cmodel').value=cfg.model||'';$('#curl').value=cfg.url||'';renderMem()}
+function loadCfg(){$('#ctts').checked=!!ttsOn;var n=racha();$('#streak').textContent='Días que llevamos juntos: '+days.length+' · Racha actual: '+n+(n>=2?' 🔥':'');$('#ckey').value=cfg.key||'';$('#cmodel').value=cfg.model||'';$('#curl').value=cfg.url||'';renderMem()}
 $('#csave').onclick=function(){
   cfg={key:$('#ckey').value.trim(),model:$('#cmodel').value.trim()||'openai/gpt-oss-120b',url:$('#curl').value.trim()||'https://api.groq.com/openai/v1/chat/completions'};
   ss('rayo_cfg',cfg);tip=false;panel.classList.remove('cfgmode');
   add('bot',cfg.key?'¡Listo! Ya tengo cerebro de IA. Cuéntame, ¿cómo te llamas y en qué andas hoy?':'Guardado. Sin clave solo puedo buscar datos.',true);
 };
+$('#ctts').onchange=function(){ttsOn=this.checked;ss('rayo_tts',ttsOn);if(ttsOn)speak('Hola, soy Rayo. Ya puedo hablarte.')};
 $('#cgroq').onclick=function(){A.open('https://console.groq.com/keys')};
 $('#cclearmem').onclick=function(){mem=[];ss('rayo_mem',mem);renderMem()};
 $('#cclearhist').onclick=function(){hist=[];ss('rayo_hist',hist);log.innerHTML='';panel.classList.remove('cfgmode');welcome()};
@@ -290,22 +357,44 @@ $('#cfgb').onclick=function(){if(panel.classList.toggle('cfgmode'))loadCfg()};
 
 // ---------- Interfaz ----------
 var Q=[['💵 Dólar','dolar'],['⛅ Clima','clima'],['📰 Noticias','noticias'],['🌎 Sismos','sismos']];
-Q.forEach(function(p){var b=document.createElement('button');b.type='button';b.textContent=p[0];b.onclick=function(){add('me',p[0],true);run(p[1])};$('#quick').appendChild(b)});
+var mb=document.createElement('button');mb.type='button';mb.textContent='☀️ Mi día';mb.onclick=miDia;$('#quick').appendChild(mb);
+Q.forEach(function(p){var b=document.createElement('button');b.type='button';b.textContent=p[0];b.onclick=function(){add('me',p[0],true);SND.send();run(p[1])};$('#quick').appendChild(b)});
 log.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-u]');if(a){e.preventDefault();A.open(a.getAttribute('data-u'))}});
 f.addEventListener('submit',function(e){e.preventDefault();ask(q.value)});
+function nombre(){for(var i=0;i<mem.length;i++){var m=mem[i].match(/(?:llama|nombre es|es)\s+([A-ZÁÉÍÓÚÑ][\wáéíóúñ]+)/);if(m)return m[1]}return ''}
+function saludo(){var h=+new Date().toLocaleString('en-US',{timeZone:'America/Lima',hour:'numeric',hour12:false});return h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'}
 function welcome(){
-  if(hist.length){hist.slice(-10).forEach(function(m){if(m.role==='user')add('me',m.content,true);else add('bot',fmt(m.content))});return}
+  if(hist.length){hist.slice(-10).forEach(function(m){if(m.role==='user')add('me',m.content,true);else add('bot',fmt(m.content))});var n=racha();add('bot',saludo()+(nombre()?', '+nombre():'')+'. '+(n>=2?'¡Llevamos '+n+' días seguidos! 🔥 ':'')+'¿En qué te ayudo hoy?',true);return}
   add('bot',cfg.key?'¡Hola! Soy Rayo ⚡. Cuéntame, ¿cómo te llamas y en qué andas hoy?':'¡Hola! Soy Rayo ⚡. Toca ⚙️ para activar mi cerebro de IA con una clave gratis y poder conversar. Mientras tanto busco datos en internet.',true);
 }
 window.rayoToggle=function(o){
   o=o===undefined?!body.classList.contains('open'):o;
+  var was=body.classList.contains('open');
   body.classList.toggle('open',o);panel.style.display=o?'flex':'none';
   if(o&&!log.children.length)welcome();
+  if(o!==was){if(o){SND.zap();SND.pop();buzz(18)}else SND.close()}
   A.expand(o);
 };
-window.rayoLean=function(a){sv.style.transform=a?'rotate('+a+'deg)':''};
+window.rayoTouch=function(k){
+  if(k==='down'){SND.grab();buzz(10)}
+  else if(k==='drag'){pet.classList.add('drag')}
+  else if(k==='drop'){pet.classList.remove('drag');SND.drop();buzz(14)}
+};
+function landFx(strong){pet.classList.remove('land');void pet.offsetWidth;pet.classList.add('land');if(strong){SND.land();buzz(25)}else SND.soft();setTimeout(function(){pet.classList.remove('land')},650)}
+window.rayoLean=function(a){
+  sv.style.transform=a?'rotate('+a+'deg)':'';
+  var m=Math.abs(a),was=Math.abs(lastLean);
+  if(m>=14){if(was<14){pet.classList.remove('walk');pet.classList.add('dash');SND.whoosh()}}
+  else if(m>0){pet.classList.remove('dash');pet.classList.add('walk');if(!was)SND.step()}
+  else{pet.classList.remove('dash','walk');if(was)landFx(was>=14)}
+  lastLean=a;
+};
 document.getElementById('x').onclick=function(){window.rayoToggle(false)};
 pet.addEventListener('click',function(){if(body.classList.contains('open'))window.rayoToggle(false)});
+var snd=document.getElementById('snd');
+function paintSnd(){snd.textContent=soundOn?'🔊':'🔇'}
+paintSnd();
+snd.onclick=function(){soundOn=!soundOn;ss('rayo_snd',soundOn);paintSnd();if(soundOn){SND.pop();buzz(12)}};
 var walk=document.getElementById('walk');
 walk.onclick=function(){roam=!roam;walk.style.opacity=roam?1:.5;A.walk(roam)};
 })();
