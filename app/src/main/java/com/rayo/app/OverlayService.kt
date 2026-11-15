@@ -20,6 +20,8 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.speech.tts.TextToSpeech
+import java.util.Locale
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.WindowManager
@@ -54,6 +56,9 @@ class OverlayService : Service() {
     private var view: RayoWebView? = null
     private val handler = Handler(Looper.getMainLooper())
     private var anim: ValueAnimator? = null
+    private var tts: TextToSpeech? = null
+    private var ttsReady = false
+    private var hablaIngles = false
 
     private var expanded = false
     private var roamOn = true
@@ -137,7 +142,30 @@ class OverlayService : Service() {
         v.loadUrl("file:///android_asset/index.html")
         view = v
         wm.addView(v, lp)
+        iniciarVoz()
         scheduleRoam(3000)
+    }
+
+    // ---------- Voz de Rayo (texto a voz del sistema) ----------
+    private fun usarEspanol(t: TextToSpeech) {
+        var r = t.setLanguage(Locale("es", "PE"))
+        if (r == TextToSpeech.LANG_MISSING_DATA || r == TextToSpeech.LANG_NOT_SUPPORTED) {
+            r = t.setLanguage(Locale("es", "ES"))
+        }
+        if (r == TextToSpeech.LANG_MISSING_DATA || r == TextToSpeech.LANG_NOT_SUPPORTED) {
+            t.setLanguage(Locale("es"))
+        }
+    }
+
+    private fun iniciarVoz() {
+        tts = TextToSpeech(applicationContext) { status ->
+            val t = tts
+            if (status == TextToSpeech.SUCCESS && t != null) {
+                usarEspanol(t)
+                t.setSpeechRate(1.05f)
+                ttsReady = true
+            }
+        }
     }
 
     // ---------- Vista: mientras está colapsada, el toque se maneja aquí (arrastrar / tocar) ----------
@@ -211,6 +239,46 @@ class OverlayService : Service() {
                 } catch (e: Exception) { }
             }
         }
+
+        @JavascriptInterface
+        fun speak(text: String) {
+            handler.post {
+                val t = tts
+                if (ttsReady && t != null) {
+                    if (hablaIngles) { usarEspanol(t); hablaIngles = false }
+                    t.speak(text, TextToSpeech.QUEUE_FLUSH, null, "rayo")
+                }
+            }
+        }
+
+        @JavascriptInterface
+        fun speakIn(text: String, lang: String) {
+            handler.post {
+                val t = tts
+                if (ttsReady && t != null) {
+                    if (lang == "en") {
+                        t.setLanguage(Locale.US)
+                        hablaIngles = true
+                    } else if (hablaIngles) {
+                        usarEspanol(t)
+                        hablaIngles = false
+                    }
+                    t.speak(text, TextToSpeech.QUEUE_FLUSH, null, "rayo")
+                }
+            }
+        }
+
+        @JavascriptInterface
+        fun setAutostart(on: Boolean) {
+            getSharedPreferences("rayo", Context.MODE_PRIVATE).edit().putBoolean("autostart", on).apply()
+        }
+
+        @JavascriptInterface
+        fun getAutostart(): Boolean =
+            getSharedPreferences("rayo", Context.MODE_PRIVATE).getBoolean("autostart", true)
+
+        @JavascriptInterface
+        fun stopSpeak() { handler.post { tts?.stop() } }
 
         @JavascriptInterface
         fun vibrate(ms: Int) {
@@ -307,6 +375,9 @@ class OverlayService : Service() {
             try { wm.removeView(it) } catch (e: Exception) { }
             it.destroy()
         }
+        tts?.stop()
+        tts?.shutdown()
+        tts = null
         view = null
         super.onDestroy()
     }

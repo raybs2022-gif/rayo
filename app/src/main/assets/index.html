@@ -88,7 +88,8 @@ body.open #pet{align-self:flex-end;margin-top:4px}
 .mi button{border:0;background:transparent;color:var(--text);opacity:.6;font-size:1rem}
 #memlist{margin-bottom:6px;opacity:.95}
 
-.head button{width:28px!important;height:28px!important;font-size:.9rem!important}
+.head button{width:27px!important;height:27px!important;font-size:.85rem!important}
+.head button+button{margin-left:4px!important}
 .m{animation:mIn .22s ease-out}
 @keyframes mIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .dots i{display:inline-block;width:7px;height:7px;margin:0 2px;border-radius:50%;background:currentColor;opacity:.3;animation:dot 1s infinite}
@@ -111,13 +112,69 @@ body.open #pet{align-self:flex-end;margin-top:4px}
 @keyframes shock{0%{transform:scale(.5);opacity:.9}100%{transform:scale(1.9);opacity:0}}
 #pet.happy{animation:hop .6s ease-out}
 @keyframes hop{0%{transform:translateY(0)}40%{transform:translateY(-14px) scale(1.06)}100%{transform:translateY(0)}}
+#log{padding-top:12px}
+
+/* ===== ASPECTO FUTURISTA ===== */
+:root{--bg:#050914;--surface:#0b1328;--text:#e8f4ff;--muted:#7f93b5;--nr:0,229,255;--neon:#00e5ff;--border:rgba(0,229,255,.28);--bubble:rgba(0,229,255,.07);--accent:#ff5a1f;--accent2:#ffb02e}
+#panel{position:relative!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;background:linear-gradient(165deg,rgba(7,12,28,.97),rgba(3,7,18,.98))!important;border:1px solid rgba(var(--nr),.4)!important;border-radius:18px!important;box-shadow:0 0 0 1px rgba(var(--nr),.1),0 0 28px rgba(var(--nr),.28),0 14px 44px rgba(0,0,0,.65)!important;color:var(--text)}
+#panel::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;border-radius:inherit;background:repeating-linear-gradient(0deg,rgba(var(--nr),.035) 0,rgba(var(--nr),.035) 1px,transparent 1px,transparent 3px)}
+.head{background:linear-gradient(110deg,rgba(var(--nr),.2),rgba(255,90,31,.6) 60%,rgba(255,176,46,.55))!important;border-bottom:1px solid rgba(var(--nr),.45);color:#fff}
+.head b{letter-spacing:.22em;font-size:1rem;text-shadow:0 0 10px rgba(var(--nr),.9)}
+.head small{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.05em;font-size:.66rem;text-transform:uppercase;opacity:.95}
+.head button{background:rgba(var(--nr),.14)!important;border:1px solid rgba(var(--nr),.5)!important;box-shadow:0 0 8px rgba(var(--nr),.3)}
+#hud{height:3px;background:rgba(var(--nr),.12);flex:none}
+#hudbar{display:block;height:100%;width:0;box-shadow:0 0 8px var(--neon);transition:width .4s}
+.m.bot{background:rgba(var(--nr),.07)!important;border:1px solid rgba(var(--nr),.3);color:var(--text)}
+.m.me{background:linear-gradient(120deg,var(--accent),var(--accent2))!important;color:#fff;box-shadow:0 0 14px rgba(255,90,31,.35)}
+.m a{color:var(--neon)}
+.m code,.m pre{background:rgba(var(--nr),.12)!important}
+.src{color:var(--muted)}
+.dots i{background:var(--neon)!important}
+form{border-top:1px solid rgba(var(--nr),.25)!important;background:rgba(0,0,0,.25)}
+#q{background:rgba(var(--nr),.06)!important;color:var(--text)!important;border:1px solid rgba(var(--nr),.35)!important}
+#q:focus{outline:none!important;box-shadow:0 0 0 2px rgba(var(--nr),.5),0 0 14px rgba(var(--nr),.4)}
+#q::placeholder{color:var(--muted)}
+.send{background:linear-gradient(120deg,var(--accent),var(--accent2))!important;box-shadow:0 0 14px rgba(255,90,31,.5)}
+#log::-webkit-scrollbar,#cfg::-webkit-scrollbar{width:4px}
+#log::-webkit-scrollbar-thumb,#cfg::-webkit-scrollbar-thumb{background:rgba(var(--nr),.4);border-radius:4px}
+#cfg{color:var(--text);padding:12px!important}
+#cfg .card{border:1px solid rgba(var(--nr),.25);background:rgba(var(--nr),.04);border-radius:12px;padding:12px;margin-bottom:12px}
+#cfg h4{margin:0 0 8px;font:600 .7rem ui-monospace,Menlo,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--neon)}
+#cfg input,#cfg textarea,#cfg select{width:100%;border:1px solid rgba(var(--nr),.3)!important;background:rgba(0,0,0,.35)!important;color:var(--text)!important;border-radius:10px;padding:10px;font:inherit;font-size:16px}
+#cfg textarea{min-height:90px;resize:vertical}
+#cfg select option{background:#0b1328;color:#e8f4ff}
+#cfg pre{margin:0 0 8px;white-space:pre-wrap;font:.78rem ui-monospace,Menlo,Consolas,monospace;color:var(--text)}
+#cfg .b1{margin-top:10px;width:100%;border:0;border-radius:10px;padding:11px;background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;font-size:1rem;box-shadow:0 0 14px rgba(255,90,31,.4)}
+#cfg .b2{margin:8px 6px 0 0;border:1px solid rgba(var(--nr),.4);background:rgba(var(--nr),.08);color:var(--text);border-radius:999px;padding:7px 12px;font-size:.82rem}
+#cfg .h{opacity:.75;font-size:.8rem;line-height:1.4;margin:6px 0 0}
+#cfg input[type=checkbox]{width:20px;height:20px;padding:0}
+.mi{border-bottom:1px solid rgba(var(--nr),.18)!important}
+.mi button{color:var(--text)}
+#pet::before{content:"";position:absolute;left:50%;top:60%;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;background:radial-gradient(circle,rgba(var(--nr),.3),rgba(var(--nr),0) 68%);pointer-events:none}
+#pet .ring{stroke:var(--neon)!important;filter:drop-shadow(0 0 3px var(--neon))}
+#pet svg circle[r="40"]{stroke:var(--neon);stroke-width:1.4}
 </style></head><body>
 <div id="panel">
-  <div class="head"><div><b>Rayo ⚡</b><small>Conversa, busca y aprende</small></div><button id="snd" aria-label="Sonido" title="Sonido y vibración">🔊</button><button id="cfgb" aria-label="Ajustes" title="Ajustes">⚙️</button><button id="walk" aria-label="Paseo" title="Paseo">🏃</button><button id="x" aria-label="Cerrar">✕</button></div>
-  <div id="cfg"><p class="h" id="streak"></p><label class="chk"><input type="checkbox" id="ctts"> Leer las respuestas en voz alta</label><p><b>Cerebro de IA (gratis)</b></p><p class="h">1) Pulsa «Abrir Groq», crea tu cuenta y en <i>API Keys</i> crea una clave.<br>2) Cópiala y pégala aquí abajo.</p><button type="button" class="b2" id="cgroq">Abrir Groq</button><label>Clave</label><input id="ckey" type="password" autocomplete="off" placeholder="gsk_..."><label>Modelo</label><input id="cmodel" autocomplete="off"><label>Dirección de la IA</label><input id="curl" autocomplete="off"><button type="button" class="b1" id="csave">Guardar</button><p><b>Lo que sé de ti</b></p><div id="memlist"></div><button type="button" class="b2" id="cclearmem">Borrar mi memoria</button><button type="button" class="b2" id="cclearhist">Borrar la conversación</button></div>
-  <div class="quick" id="quick"></div>
+  <div class="head"><div><b>RAYO ⚡</b><small id="sub"></small></div><button id="voz" aria-label="Voz" title="Voz de Rayo">🗣️</button><button id="snd" aria-label="Sonido" title="Sonido y vibración">🔊</button><button id="cfgb" aria-label="Ajustes" title="Ajustes">⚙️</button><button id="walk" aria-label="Paseo" title="Paseo">🏃</button><button id="x" aria-label="Cerrar">✕</button></div>
+  <div id="hud"><i id="hudbar"></i></div>
+  <div id="cfg">
+   <div id="lockbox" style="display:none"><div class="card"><h4>Ajustes protegidos</h4><input id="lpin" type="password" inputmode="numeric" placeholder="PIN"><button type="button" class="b1" id="lgo">Entrar</button><p class="h" id="lmsg"></p></div></div>
+   <div id="cfgbody">
+    <div class="card"><h4>Perfil</h4><p class="h" id="streak" style="margin:0"></p></div>
+    <div class="card"><h4>Medidor de consultas</h4><pre id="usage"></pre><label>Límite diario estimado</label><input id="climit" type="number" inputmode="numeric"></div>
+    <div class="card"><h4>Cerebro de IA principal</h4><p class="h">1) Pulsa «Abrir Groq», crea tu cuenta y en <i>API Keys</i> crea una clave. 2) Pégala aquí.</p><button type="button" class="b2" id="cgroq">Abrir Groq</button><label>Clave</label><input id="ckey" type="password" autocomplete="off" placeholder="gsk_..."><label>Modelos (separados por coma; si el primero se agota, uso el siguiente)</label><input id="cmodels" autocomplete="off"><label>Dirección de la IA</label><input id="curl" autocomplete="off"></div>
+    <div class="card"><h4>Respaldo (opcional)</h4><p class="h">Otro proveedor gratis como OpenRouter. Si el principal se agota, paso a este.</p><button type="button" class="b2" id="cor">Abrir OpenRouter</button><label>Clave</label><input id="ckey2" type="password" autocomplete="off"><label>Modelo</label><input id="cmodel2" autocomplete="off"><label>Dirección</label><input id="curl2" autocomplete="off"></div>
+    <div class="card"><h4>Modo y apariencia</h4><label>Modo de Rayo</label><select id="cmode"><option value="normal">Normal</option><option value="ingles">Profesor de inglés</option></select><label>Tema de color</label><select id="ctheme"><option value="neon">Neón cian</option><option value="fuego">Fuego</option><option value="matrix">Matrix</option><option value="violeta">Violeta</option></select></div>
+    <div class="card"><h4>Voz e inicio</h4><label class="chk"><input type="checkbox" id="ctts"> Leer las respuestas en voz alta</label><label class="chk"><input type="checkbox" id="cauto"> Iniciar Rayo al prender el celular</label></div>
+    <div class="card"><h4>Seguridad</h4><label>PIN para abrir ajustes (4 a 6 dígitos, vacío = sin PIN)</label><input id="cpin" type="password" inputmode="numeric" maxlength="6"></div>
+    <button type="button" class="b1" id="csave">Guardar ajustes</button>
+    <div class="card" style="margin-top:12px"><h4>Lo que sé de ti</h4><div id="memlist"></div><button type="button" class="b2" id="cclearmem">Borrar mi memoria</button><button type="button" class="b2" id="cclearhist">Borrar la conversación</button><p class="h">Para enseñarme algo al instante escribe «Aprende: …». Para quitarlo, «Olvida: …».</p></div>
+    <div class="card"><h4>Libreta personal</h4><p class="h">Pega aquí textos largos (normas, apuntes, procedimientos). Los uso cuando tu pregunta se relaciona.</p><textarea id="cnotes"></textarea><button type="button" class="b2" id="csavenotes">Guardar libreta</button><p class="h" id="bkmsg2"></p></div>
+    <div class="card"><h4>Copia de seguridad</h4><p class="h">Genera una copia de tu memoria, libreta y progreso para no perderla si reinstalas. No incluye tus claves.</p><textarea id="bk" placeholder="Aquí aparece la copia, o pega una para restaurar"></textarea><button type="button" class="b2" id="bkgen">Generar copia</button><button type="button" class="b2" id="bkres">Restaurar</button><p class="h" id="bkmsg"></p></div>
+   </div>
+  </div>
   <div id="log"></div>
-  <form id="f"><input id="q" placeholder="Pregunta o busca algo…" autocomplete="off"><button class="send" id="s">➤</button></form>
+  <form id="f"><input id="q" placeholder="Escribe una pregunta o comando…" autocomplete="off"><button class="send" id="s">➤</button></form>
 </div>
 <div id="pet"><svg viewBox="0 0 100 100" aria-hidden="true">
     <defs><clipPath id="ph"><circle cx="50" cy="58" r="37"/></clipPath>
@@ -154,7 +211,26 @@ panel.style.display='none';
 function $(s){return document.querySelector(s)}
 function ls(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
 function ss(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
-var soundOn=ls('rayo_snd',true),ttsOn=ls('rayo_tts',false),AC=null,lastLean=0;
+var GROQ='https://api.groq.com/openai/v1/chat/completions',OR='https://openrouter.ai/api/v1/chat/completions';
+var old=ls('rayo_cfg',{});
+var cfg=Object.assign({key:'',models:'openai/gpt-oss-120b,llama-3.1-8b-instant',url:GROQ,key2:'',model2:'',url2:OR,limit:1000},old);
+if(old&&old.model&&!old.models)cfg.models=old.model+',llama-3.1-8b-instant';
+var today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Lima'});
+var mem=ls('rayo_mem',[]),hist=ls('rayo_hist',[]),nuser=ls('rayo_n',0),tip=false;
+var notes=ls('rayo_notes',''),mode=ls('rayo_mode','normal'),theme=ls('rayo_theme','neon'),xp=ls('rayo_xp',0),enN=ls('rayo_en',0);
+var pin=ls('rayo_pin',''),unlocked=false,cache=ls('rayo_cache',{}),use=ls('rayo_use',{d:'',n:0,m:{}}),cool={},mc={},warned=ls('rayo_warn','');
+var days=ls('rayo_days',[]);
+if(days[days.length-1]!==today){days.push(today);days=days.slice(-90);ss('rayo_days',days)}
+function racha(){var n=0,d=new Date(today+'T12:00:00Z');for(var i=days.length-1;i>=0;i--){if(days[i]===d.toISOString().slice(0,10)){n++;d.setUTCDate(d.getUTCDate()-1)}else break}return n}
+function level(){return Math.floor(Math.sqrt(xp/25))+1}
+
+// ---------- Temas ----------
+var THEMES={neon:{nr:'0,229,255',neon:'#00e5ff',a:'#ff5a1f',b:'#ffb02e'},fuego:{nr:'255,106,0',neon:'#ff6a00',a:'#d92b2b',b:'#ffb02e'},matrix:{nr:'57,255,20',neon:'#39ff14',a:'#00a844',b:'#b2ff59'},violeta:{nr:'199,125,255',neon:'#c77dff',a:'#7b2ff7',b:'#ff4ecd'}};
+function applyTheme(){var t=THEMES[theme]||THEMES.neon,r=document.documentElement.style;r.setProperty('--nr',t.nr);r.setProperty('--neon',t.neon);r.setProperty('--accent',t.a);r.setProperty('--accent2',t.b)}
+applyTheme();
+
+// ---------- Sonidos, vibración y voz ----------
+var soundOn=ls('rayo_snd',true),ttsOn=ls('rayo_tts',true),AC=null,lastLean=0;
 function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended'){try{AC.resume()}catch(e){}}return AC}
 function tone(f1,f2,dur,type,vol,delay){var c=ac();if(!c||!soundOn)return;try{var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(Math.max(1,f2),t+dur);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime((vol||.2)*.6,t+.012);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+.03)}catch(e){}}
 function noise(dur,f1,f2,vol){var c=ac();if(!c||!soundOn)return;try{var n=Math.floor(c.sampleRate*dur),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);for(var i=0;i<n;i++)d[i]=Math.random()*2-1;var s=c.createBufferSource();s.buffer=b;var fl=c.createBiquadFilter();fl.type='bandpass';fl.Q.value=1.2;var t=c.currentTime;fl.frequency.setValueAtTime(f1,t);fl.frequency.exponentialRampToValueAtTime(Math.max(20,f2),t+dur);var g=c.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime((vol||.2)*.6,t+dur*.25);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);s.connect(fl);fl.connect(g);g.connect(c.destination);s.start(t)}catch(e){}}
@@ -170,15 +246,22 @@ var SND={
  land:function(){tone(150,45,.22,'sine',.4);noise(.12,600,200,.2)},
  grab:function(){tone(520,780,.07,'square',.1)},
  drop:function(){tone(300,100,.14,'sine',.3)},
- zap:function(){noise(.2,1500,6000,.25);tone(1800,300,.18,'sawtooth',.1)}
+ zap:function(){noise(.2,1500,6000,.25);tone(1800,300,.18,'sawtooth',.1)},
+ level:function(){tone(523,523,.1,'sine',.25);tone(659,659,.1,'sine',.25,.1);tone(784,784,.1,'sine',.25,.2);tone(1046,1046,.25,'sine',.25,.3)}
 };
 function buzz(ms){if(soundOn&&typeof A.vibrate==='function'){try{A.vibrate(ms)}catch(e){}}}
-function speak(t){if(!ttsOn||!window.speechSynthesis)return;try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(String(t).replace(/[*`#•]/g,'').slice(0,600));u.lang='es-ES';u.rate=1.05;speechSynthesis.speak(u)}catch(e){}}
-var days=ls('rayo_days',[]),today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Lima'});
-if(days[days.length-1]!==today){days.push(today);days=days.slice(-90);ss('rayo_days',days)}
-function racha(){var n=0,d=new Date(today+'T12:00:00Z');for(var i=days.length-1;i>=0;i--){if(days[i]===d.toISOString().slice(0,10)){n++;d.setUTCDate(d.getUTCDate()-1)}else break}return n}
-var cfg=ls('rayo_cfg',{key:'',model:'openai/gpt-oss-120b',url:'https://api.groq.com/openai/v1/chat/completions'});
-var mem=ls('rayo_mem',[]),hist=ls('rayo_hist',[]),nuser=ls('rayo_n',0),tip=false;
+function speak(t){
+  if(!ttsOn)return;
+  var en=mode==='ingles';
+  var c=String(t).replace(/https?:\/\/\S+/g,'').replace(en?/\([^)]*\)/g:/$^/,'').replace(/[*`#•_]/g,'').replace(/\s+/g,' ').trim().slice(0,700);
+  if(!c)return;
+  if(en&&typeof A.speakIn==='function'){try{A.speakIn(c,'en')}catch(e){}return}
+  if(typeof A.speak==='function'){try{A.speak(c)}catch(e){}return}
+  if(window.speechSynthesis){try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(c);u.lang=en?'en-US':'es-ES';u.rate=1.05;speechSynthesis.speak(u)}catch(e){}}
+}
+function stopSpeak(){try{if(typeof A.stopSpeak==='function')A.stopSpeak();else if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}}
+
+// ---------- Utilidades de pantalla ----------
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function fmt(t){
   var parts=String(t).split(/```(?:\w+)?\n?/),out='';
@@ -192,21 +275,30 @@ function fmt(t){
 function typing(){var d=document.createElement('div');d.className='m bot';d.innerHTML='<span class="dots"><i></i><i></i><i></i></span>';log.appendChild(d);log.scrollTop=log.scrollHeight;return d}
 function add(role,html,isText){var d=document.createElement('div');d.className='m '+role;if(isText)d.textContent=html;else d.innerHTML=html;log.appendChild(d);log.scrollTop=log.scrollHeight;return d}
 function hora(ms){try{return new Date(ms).toLocaleString('es-PE',{timeZone:'America/Lima',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}catch(e){return ''}}
-async function getJSON(u){var r=await fetch(u);if(!r.ok)throw new Error('http '+r.status);return r.json()}
-async function getText(u){var r=await fetch(u);if(!r.ok)throw new Error('http '+r.status);return r.text()}
+async function getJSON(u){var c=mc[u];if(c&&Date.now()-c.t<600000)return c.v;var r=await fetch(u);if(!r.ok)throw new Error('http '+r.status);var v=await r.json();mc[u]={t:Date.now(),v:v};return v}
+async function getText(u){var c=mc[u];if(c&&Date.now()-c.t<600000)return c.v;var r=await fetch(u);if(!r.ok)throw new Error('http '+r.status);var v=await r.text();mc[u]={t:Date.now(),v:v};return v}
 var WC={0:'Despejado',1:'Mayormente despejado',2:'Parcialmente nublado',3:'Nublado',45:'Neblina',48:'Neblina',51:'Llovizna',53:'Llovizna',55:'Llovizna fuerte',61:'Lluvia ligera',63:'Lluvia',65:'Lluvia fuerte',80:'Chubascos',81:'Chubascos',82:'Chubascos fuertes',95:'Tormenta',96:'Tormenta',99:'Tormenta'};
+function paintSub(){$('#sub').textContent=(mode==='ingles'?'Profesor de inglés':'Conversa, busca y aprende')+' · NV '+level()}
+function paintHud(){
+  if(use.d!==today){use={d:today,n:0,m:{}};ss('rayo_use',use)}
+  var p=Math.min(1,use.n/Math.max(1,cfg.limit)),bar=$('#hudbar');
+  bar.style.width=(p*100)+'%';bar.style.background=p>.9?'#ff3b3b':p>.7?'#ffb02e':'var(--neon)';
+  var u=$('#usage');
+  if(u){var l='Hoy llevas '+use.n+' de ~'+cfg.limit+' consultas ('+Math.round(p*100)+'%).';Object.keys(use.m).forEach(function(k){l+='\n· '+k.replace(/^[go]:/,'')+': '+use.m[k]});u.textContent=l}
+}
+function ahorro(){return use.d===today&&use.n>=cfg.limit*.8}
 
-// ---------- Datos de internet (devuelven texto para la IA y html para mostrar) ----------
+// ---------- Datos de internet ----------
 async function dolar(){
   var j=await getJSON('https://open.er-api.com/v6/latest/USD');var p=j.rates&&j.rates.PEN;if(!p)throw new Error('sin dato');
-  return {t:'Dólar hoy: S/ '+p.toFixed(3)+' por 1 USD (tipo de cambio de referencia internacional; casas de cambio y bancos del Perú pueden diferir). Fuente: open.er-api.com',
-   h:'<p><b>Dólar hoy: S/ '+p.toFixed(3)+'</b> por 1 USD (referencia internacional).</p><p>Las casas de cambio y los bancos del Perú pueden cotizar un poco distinto.</p><div class="src">Fuente: open.er-api.com</div>'};
+  return {t:'Dólar hoy: S/ '+p.toFixed(3)+' por 1 USD (referencia internacional; casas de cambio y bancos del Perú pueden diferir). Fuente: open.er-api.com',
+   h:'<p><b>Dólar hoy: S/ '+p.toFixed(3)+'</b> por 1 USD (referencia internacional).</p><div class="src">Fuente: open.er-api.com</div>'};
 }
 async function clima(){
   var j=await getJSON('https://api.open-meteo.com/v1/forecast?latitude=-12.046&longitude=-77.043&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=America%2FLima&forecast_days=1');
   var c=j.current,d=j.daily,w=WC[c.weather_code]||'Variable';
   return {t:'Clima en Lima ahora: '+Math.round(c.temperature_2m)+' °C, '+w+'. Máx '+Math.round(d.temperature_2m_max[0])+' °C, mín '+Math.round(d.temperature_2m_min[0])+' °C, humedad '+c.relative_humidity_2m+'%, viento '+Math.round(c.wind_speed_10m)+' km/h, probabilidad de lluvia hoy '+d.precipitation_probability_max[0]+'%. Fuente: Open-Meteo',
-   h:'<p><b>Lima ahora: '+Math.round(c.temperature_2m)+' °C</b> · '+w+'</p><p>Máx '+Math.round(d.temperature_2m_max[0])+' °C · Mín '+Math.round(d.temperature_2m_min[0])+' °C<br>Humedad '+c.relative_humidity_2m+'% · Viento '+Math.round(c.wind_speed_10m)+' km/h<br>Probabilidad de lluvia hoy: '+d.precipitation_probability_max[0]+'%</p><div class="src">Fuente: Open-Meteo</div>'};
+   h:'<p><b>Lima ahora: '+Math.round(c.temperature_2m)+' °C</b> · '+w+'</p><div class="src">Fuente: Open-Meteo</div>'};
 }
 async function noticias(qry){
   var term=(qry||'Perú').slice(0,90);
@@ -215,12 +307,12 @@ async function noticias(qry){
   if(!items.length)throw new Error('sin noticias');
   var tt='Titulares recientes (Google Noticias) sobre "'+term+'":\n',h='<p><b>Titulares</b></p><ul>';
   items.forEach(function(it){var ti=it.querySelector('title').textContent,li=it.querySelector('link').textContent;tt+='- '+ti+'\n';h+='<li><a href="#" data-u="'+esc(li)+'">'+esc(ti)+'</a></li>'});
-  return {t:tt,h:h+'</ul><div class="src">Fuente: Google Noticias. Toca un titular para abrirlo.</div>'};
+  return {t:tt,h:h+'</ul><div class="src">Fuente: Google Noticias.</div>'};
 }
 async function sismos(){
   var j=await getJSON('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson');
   var l=j.features.filter(function(x){return /per[uú]/i.test(x.properties.place||'')}).slice(0,5);
-  if(!l.length)return {t:'No hay sismos de magnitud 2,5 o más en Perú en las últimas 24 horas (USGS; el IGP tiene el detalle oficial).',h:'<p>No hay sismos de magnitud 2,5 o más en Perú en las últimas 24 horas.</p><div class="src">Fuente: USGS. El IGP tiene el detalle oficial.</div>'};
+  if(!l.length)return {t:'No hay sismos de magnitud 2,5 o más en Perú en las últimas 24 horas (USGS; el IGP tiene el detalle oficial).',h:'<p>No hay sismos de magnitud 2,5 o más en Perú en las últimas 24 horas.</p><div class="src">Fuente: USGS.</div>'};
   var tt='Sismos recientes en Perú (USGS):\n',h='<p><b>Sismos recientes en Perú</b></p><ul>';
   l.forEach(function(x){tt+='- M '+x.properties.mag+', '+x.properties.place+', '+hora(x.properties.time)+'\n';h+='<li>M '+x.properties.mag+' · '+esc(x.properties.place)+' · '+hora(x.properties.time)+'</li>'});
   return {t:tt,h:h+'</ul><div class="src">Fuente: USGS. Para datos oficiales consulta al IGP.</div>'};
@@ -242,26 +334,70 @@ async function run(kind,text){
   finally{busy=false;sb.disabled=false;log.scrollTop=log.scrollHeight}
 }
 
-// ---------- Cerebro: IA conversacional ----------
-async function llm(messages,maxTok,temp){
-  var body={model:cfg.model,messages:messages,max_tokens:maxTok,temperature:temp};
-  if(/gpt-oss/i.test(cfg.model))body.reasoning_effort='low';
-  var r=await fetch(cfg.url,{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+cfg.key},body:JSON.stringify(body)});
+// ---------- Cerebro: varios modelos con respaldo automático ----------
+function targets(){
+  var a=[];
+  if(cfg.key)String(cfg.models).split(',').map(function(x){return x.trim()}).filter(Boolean).forEach(function(m){a.push({k:'g:'+m,url:cfg.url,key:cfg.key,model:m})});
+  if(cfg.key2&&cfg.model2)a.push({k:'o:'+cfg.model2,url:cfg.url2,key:cfg.key2,model:cfg.model2});
+  return a;
+}
+function bump(t){
+  if(use.d!==today)use={d:today,n:0,m:{}};
+  use.n++;use.m[t.k]=(use.m[t.k]||0)+1;ss('rayo_use',use);paintHud();
+  if(use.n>=cfg.limit*.8&&warned!==today){warned=today;ss('rayo_warn',today);add('bot','Ojo: ya usaste el 80% de tus consultas de hoy (~'+cfg.limit+'). Activé el modo ahorro: respuestas más cortas.',true)}
+}
+async function call(t,messages,maxTok,temp){
+  var b={model:t.model,messages:messages,max_tokens:maxTok,temperature:temp};
+  if(/gpt-oss/i.test(t.model))b.reasoning_effort='low';
+  var r=await fetch(t.url,{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+t.key},body:JSON.stringify(b)});
   var j;try{j=await r.json()}catch(e){j={}}
   if(!r.ok){var m=(j.error&&(j.error.message||j.error))||('Error '+r.status);var er=new Error(typeof m==='string'?m:JSON.stringify(m));er.status=r.status;throw er}
   var c=j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;
   return (c||'').trim();
 }
-function sys(){
+async function llm(messages,maxTok,temp,small){
+  var ts=targets();
+  if(!ts.length){var e0=new Error('sin clave');e0.status=401;throw e0}
+  var g=ts.filter(function(x){return x.k.charAt(0)==='g'}),o=ts.filter(function(x){return x.k.charAt(0)==='o'});
+  if(small&&g.length>1)g=[g[g.length-1]].concat(g.slice(0,-1));
+  ts=g.concat(o);
+  var live=ts.filter(function(x){return !(cool[x.k]>Date.now())});
+  if(!live.length)live=ts;
+  var first=null;
+  for(var i=0;i<live.length;i++){
+    var t=live[i];
+    try{bump(t);return await call(t,messages,maxTok,temp)}
+    catch(e){
+      if(!first)first=e;
+      var s=e&&e.status;
+      if(s===429)cool[t.k]=Date.now()+(/day|d[ií]a|TPD|RPD/i.test(e.message)?3600000:60000);
+      else if(s===401||s===403)cool[t.k]=Date.now()+600000;
+      else if(!(s===400||s===404||s>=500||e instanceof TypeError))throw e;
+    }
+  }
+  throw first;
+}
+function notasRel(t){
+  if(!notes)return '';
+  var w=t.toLowerCase().replace(/[^a-záéíóúñü0-9 ]/g,' ').split(/\s+/).filter(function(x){return x.length>3});
+  if(!w.length)return '';
+  var ps=notes.split(/\n{2,}/).map(function(p){var l=p.toLowerCase(),s=0;w.forEach(function(x){if(l.indexOf(x)>=0)s++});return {p:p,s:s}}).filter(function(x){return x.s>0}).sort(function(a,b){return b.s-a.s}).slice(0,2);
+  return ps.map(function(x){return x.p.slice(0,600)}).join('\n---\n');
+}
+function sys(t){
   var ahora=new Date().toLocaleString('es-PE',{timeZone:'America/Lima',dateStyle:'full',timeStyle:'short'});
-  return 'Eres Rayo, una mascota flotante veloz y simpática, inspirada en los superhéroes velocistas. Conversas como un amigo inteligente y cercano. Respondes en el idioma del usuario (por defecto español), claro, cálido y directo; breve salvo que pidan detalle. Puedes explicar, aconsejar, redactar, traducir, calcular y dar ideas sobre casi cualquier tema. No inventes datos: si no sabes algo, dilo. '+
+  var s='Eres Rayo, una mascota flotante veloz y futurista, inspirada en los superhéroes velocistas. Conversas como un amigo inteligente y cercano. Respondes en el idioma del usuario (por defecto español), claro, cálido y directo; breve salvo que pidan detalle. Puedes explicar, aconsejar, redactar, traducir, calcular y dar ideas sobre casi cualquier tema. No inventes datos: si no sabes algo, dilo. '+
   'Fecha y hora en Lima, Perú: '+ahora+'. '+
-  'Si el mensaje trae un bloque [DATOS DE INTERNET], úsalo para los datos actuales y menciona la fuente; si no alcanza para responder, dilo con honestidad. Sin ese bloque no tienes datos en tiempo real. '+
-  'En temas médicos, legales o financieros informa y sugiere consultar a un profesional. Formato: texto sencillo, **negrita** y listas con guiones. '+
-  (mem.length?'LO QUE SABES DEL USUARIO (úsalo con naturalidad, sin recitarlo): '+mem.join('; ')+'. ':'Aún no conoces al usuario: si surge de forma natural, pregúntale su nombre y a qué se dedica. ');
+  'Si el mensaje trae un bloque [DATOS DE INTERNET], úsalo para los datos actuales y menciona la fuente; si no alcanza, dilo con honestidad. Sin ese bloque no tienes datos en tiempo real. '+
+  'En temas médicos, legales o financieros informa y sugiere consultar a un profesional. Formato: texto sencillo, **negrita** y listas con guiones. ';
+  if(mode==='ingles')s+='MODO PROFESOR DE INGLÉS: conversa con el usuario en inglés sencillo y claro, adaptado a su nivel (pregúntaselo si no lo sabes). Pon la traducción al español entre paréntesis solo cuando haga falta. Si comete errores, corrígelos con amabilidad mostrando la frase corregida y una explicación corta. Termina casi siempre con una pregunta para que siga practicando. Si pide la palabra del día, dale una palabra con ejemplo y traducción. ';
+  s+=mem.length?'LO QUE SABES DEL USUARIO (úsalo con naturalidad, sin recitarlo): '+mem.join('; ')+'. ':'Aún no conoces al usuario: si surge de forma natural, pregúntale su nombre y a qué se dedica. Si le preguntaste su nombre y responde con una sola palabra, esa palabra ES su nombre: salúdalo por su nombre y continúa sin volver a presentarte. ';
+  var n=notasRel(t||'');if(n)s+='DATOS DE SU LIBRETA PERSONAL (úsalos si ayudan): '+n+' ';
+  return s;
 }
 async function contexto(t){
   var l=t.toLowerCase(),jobs=[];
+  if(/mi d[ií]a|resumen del d[ií]a|qu[eé] hay hoy|c[oó]mo amanece/.test(l)){jobs.push(clima(),dolar(),noticias())}
   if(/d[oó]lar|tipo de cambio/.test(l))jobs.push(dolar());
   if(/clima|tiempo (hace|har[aá])|lluvi|temperatura|llover/.test(l))jobs.push(clima());
   if(/sismo|temblor/.test(l))jobs.push(sismos());
@@ -274,21 +410,52 @@ async function contexto(t){
 function errMsg(e){
   var s=e&&e.status,m=String(e&&e.message||'');
   if(s===401||s===403)return 'La clave no es válida o no tiene permiso. Revísala en ⚙️.';
-  if(s===429)return 'Llegué al límite gratis por ahora. Espera un minuto e inténtalo otra vez.';
-  if(s===404||/model/i.test(m))return 'No encuentro ese modelo de IA. Cambia el nombre del modelo en ⚙️.';
+  if(s===429)return 'Llegué al límite gratis en todos mis cerebros. Espera un minuto o agrega una clave de respaldo en ⚙️.';
+  if(s===404||/model/i.test(m))return 'No encuentro ese modelo de IA. Revisa la lista de modelos en ⚙️.';
   if(e instanceof TypeError)return 'No pude conectarme a internet. Revisa tu conexión.';
   return 'No pude responder: '+m.slice(0,200);
 }
+function addXp(n){var a=level();xp+=n;ss('rayo_xp',xp);if(level()>a){add('bot','¡Subí a nivel '+level()+'! ⚡ Gracias por enseñarme.',true);SND.level();pet.classList.add('happy');setTimeout(function(){pet.classList.remove('happy')},700)}paintSub()}
 async function aprender(u,a){
   nuser++;ss('rayo_n',nuser);
-  if(!(/recuerd|me llamo|mi nombre|soy |trabajo|vivo|me gusta|tengo |quiero |mi |mis |prefiero/i.test(u)||nuser%3===0))return;
+  if(ahorro()&&!/recuerd/i.test(u))return;
+  if(!(mem.length<3||/recuerd|me llamo|mi nombre|soy |trabajo|vivo|me gusta|tengo |quiero |mi |mis |prefiero/i.test(u)||nuser%3===0))return;
   try{
-    var out=await llm([{role:'system',content:'Extraes datos duraderos sobre el USUARIO (nombre, trabajo, lugar, gustos, metas, preferencias sobre cómo responderle). Responde SOLO con JSON: {"nuevos":["dato corto"]}. Máximo 3 datos, en español, sin repetir lo ya conocido: '+JSON.stringify(mem)+'. Si no hay nada nuevo: {"nuevos":[]}.'},{role:'user',content:'Usuario: '+u+'\nAsistente: '+String(a).slice(0,300)}],500,0);
+    var out=await llm([{role:'system',content:'Extraes datos duraderos sobre el USUARIO (nombre, trabajo, lugar, gustos, metas, nivel de inglés, preferencias sobre cómo responderle). Responde SOLO con JSON: {"nuevos":["dato corto"]}. Máximo 3 datos, en español, sin repetir lo ya conocido: '+JSON.stringify(mem)+'. Si no hay nada nuevo: {"nuevos":[]}.'},{role:'user',content:'Usuario: '+u+'\nAsistente: '+String(a).slice(0,300)}],500,0,true);
     var m=out.match(/\{[\s\S]*\}/);if(!m)return;
     var j=JSON.parse(m[0]);
     (j.nuevos||[]).forEach(function(x){x=String(x).trim().slice(0,140);if(x&&!mem.some(function(y){return y.toLowerCase()===x.toLowerCase()}))mem.push(x)});
     mem=mem.slice(-60);ss('rayo_mem',mem);renderMem();
   }catch(e){}
+}
+var TIPS=/^(¿)?(qu[eé]|qui[eé]n|cu[aá]l|c[oó]mo|cu[aá]ndo|d[oó]nde|cu[aá]nto|por qu[eé])(?![a-záéíóúñ])/i;
+function norm(t){return t.toLowerCase().replace(/[^a-záéíóúñü0-9 ]/g,'').replace(/\s+/g,' ').trim()}
+function isSimple(t){return t.length<50&&mode==='normal'&&!/explica|c[oó]digo|programa|analiza|paso a paso|redacta|resume|traduce|compara/i.test(t)}
+async function respond(t,ctxOver){
+  busy=true;sb.disabled=true;pet.classList.add('think');
+  var b=typing();
+  try{
+    var ctx=ctxOver!==undefined?ctxOver:await contexto(t);
+    var key=norm(t),ck=cache[key],cacheable=!ctx&&mode==='normal'&&t.length>14&&TIPS.test(t);
+    var out='',fromCache=false;
+    if(cacheable&&ck&&Date.now()-ck.t<21600000){out=ck.a;fromCache=true}
+    else{
+      var msgs=[{role:'system',content:sys(t)}].concat(hist.slice(-6),[{role:'user',content:ctx?t+'\n\n[DATOS DE INTERNET]\n'+ctx:t}]);
+      out=await llm(msgs,ahorro()?500:1200,0.6,isSimple(t));
+      if(!out)out=await llm(msgs,2500,0.6,false);
+      if(!out)out='No pude armar una respuesta. Intenta de nuevo.';
+      if(cacheable){cache[key]={a:out,t:Date.now()};var ks=Object.keys(cache);if(ks.length>40)delete cache[ks[0]];ss('rayo_cache',cache)}
+    }
+    b.innerHTML=fmt(out);
+    SND.recv();buzz(20);speak(out);
+    pet.classList.add('happy');setTimeout(function(){pet.classList.remove('happy')},700);
+    hist.push({role:'user',content:t},{role:'assistant',content:out});hist=hist.slice(-30);ss('rayo_hist',hist);
+    if(mode==='ingles'){enN++;ss('rayo_en',enN)}
+    busy=false;sb.disabled=false;
+    addXp(5);
+    if(!fromCache)aprender(t,out);
+  }catch(e){b.textContent=errMsg(e);SND.err()}
+  finally{busy=false;sb.disabled=false;pet.classList.remove('think');log.scrollTop=log.scrollHeight}
 }
 function sinClave(t){
   var l=t.toLowerCase();
@@ -299,80 +466,115 @@ function sinClave(t){
   else if(/sismo|temblor/.test(l))run('sismos');
   else run('wiki',t);
 }
-async function respond(t,ctxOver){
-  busy=true;sb.disabled=true;pet.classList.add('think');
-  var b=typing();
-  try{
-    var ctx=ctxOver!==undefined?ctxOver:await contexto(t);
-    var msgs=[{role:'system',content:sys()}].concat(hist.slice(-8),[{role:'user',content:ctx?t+'\n\n[DATOS DE INTERNET]\n'+ctx:t}]);
-    var out=await llm(msgs,1200,0.6);
-    if(!out)out=await llm(msgs,2500,0.6);
-    if(!out)out='No pude armar una respuesta. Intenta de nuevo.';
-    b.innerHTML=fmt(out);
-    SND.recv();buzz(20);speak(out);
-    pet.classList.add('happy');setTimeout(function(){pet.classList.remove('happy')},700);
-    hist.push({role:'user',content:t},{role:'assistant',content:out});hist=hist.slice(-30);ss('rayo_hist',hist);
-    busy=false;sb.disabled=false;
-    aprender(t,out);
-  }catch(e){b.textContent=errMsg(e);SND.err()}
-  finally{busy=false;sb.disabled=false;pet.classList.remove('think');log.scrollTop=log.scrollHeight}
+function aprendeManual(x){
+  x=x.trim().slice(0,140);
+  if(!mem.some(function(y){return y.toLowerCase()===x.toLowerCase()}))mem.push(x);
+  mem=mem.slice(-60);ss('rayo_mem',mem);renderMem();add('bot','Listo, lo aprendí: «'+x+'».',true);SND.recv();addXp(10);
+}
+function olvida(x){
+  var k=x.trim().toLowerCase(),n=mem.length;
+  mem=mem.filter(function(y){return y.toLowerCase().indexOf(k)<0});
+  ss('rayo_mem',mem);renderMem();
+  add('bot',n!==mem.length?'Listo, olvidé '+(n-mem.length)+' dato(s) sobre «'+x.trim()+'».':'No encontré nada que coincida con «'+x.trim()+'».',true);
+}
+function listaMem(){add('bot',mem.length?'Esto es lo que sé de ti:\n'+mem.map(function(m){return '• '+m}).join('\n'):'Todavía no sé nada de ti. Cuéntame o escribe «Aprende: …».',true)}
+function setMode(m){
+  mode=m;ss('rayo_mode',mode);paintSub();var ms=$('#cmode');if(ms)ms.value=m;
+  if(m==='ingles'){
+    if(!cfg.key){add('bot','El modo inglés necesita mi cerebro de IA. Toca ⚙️ y pega tu clave.',true);mode='normal';ss('rayo_mode',mode);paintSub();return}
+    respond('Start our English lesson: greet me in one short sentence, ask my level (beginner, intermediate or advanced) in one short question, and give me the word of the day with an example. Add the Spanish translation in parentheses.');
+  }else add('bot','Volví al modo normal. ¿En qué te ayudo?',true);
 }
 async function ask(t){
   t=t.trim();if(!t||busy)return;
   add('me',t,true);q.value='';SND.send();
+  var m;
+  if((m=t.match(/^aprende:?\s+(.+)/i))){aprendeManual(m[1]);return}
+  if((m=t.match(/^olvida:?\s+(.+)/i))){olvida(m[1]);return}
+  if(/^¿?\s*(qu[eé] sabes de m[ií]|qu[eé] recuerdas de m[ií]|mi memoria)\s*\??$/i.test(t)){listaMem();return}
+  if(/^\/?(modo )?ingl[eé]s$/i.test(t)){setMode('ingles');return}
+  if(/^\/?(modo )?normal$/i.test(t)){setMode('normal');return}
   if(!cfg.key){sinClave(t);return}
   respond(t);
 }
-async function miDia(){
-  if(busy)return;
-  add('me','☀️ Mi día',true);SND.send();
-  if(!cfg.key){
-    busy=true;var b=typing();
-    try{var r=await Promise.all([clima().catch(function(){return null}),dolar().catch(function(){return null}),noticias().catch(function(){return null})]);b.innerHTML=r.filter(Boolean).map(function(x){return x.h}).join('<hr>')||'No pude conectarme a internet.';SND.recv()}
-    finally{busy=false;log.scrollTop=log.scrollHeight}
-    return;
-  }
-  var r=await Promise.all([clima().catch(function(){return null}),dolar().catch(function(){return null}),noticias().catch(function(){return null})]);
-  var ctx=r.filter(Boolean).map(function(x){return x.t}).join('\n\n').slice(0,2500);
-  respond('Hazme mi resumen del día: salúdame según la hora, dime el clima de Lima, el dólar, tres titulares importantes de Perú y un consejo breve para hoy.',ctx);
-}
 
-// ---------- Ajustes y memoria ----------
+// ---------- Ajustes ----------
 function renderMem(){
   var box=$('#memlist');if(!box)return;box.innerHTML='';
   if(!mem.length){box.textContent='Todavía no sé nada de ti. Cuéntame de ti y lo iré aprendiendo.';return}
   mem.forEach(function(x,i){var d=document.createElement('div');d.className='mi';var s=document.createElement('span');s.textContent=x;var b=document.createElement('button');b.type='button';b.textContent='✕';b.onclick=function(){mem.splice(i,1);ss('rayo_mem',mem);renderMem()};d.appendChild(s);d.appendChild(b);box.appendChild(d)});
 }
-function loadCfg(){$('#ctts').checked=!!ttsOn;var n=racha();$('#streak').textContent='Días que llevamos juntos: '+days.length+' · Racha actual: '+n+(n>=2?' 🔥':'');$('#ckey').value=cfg.key||'';$('#cmodel').value=cfg.model||'';$('#curl').value=cfg.url||'';renderMem()}
+function loadCfg(){
+  $('#ctts').checked=!!ttsOn;var n=racha();
+  $('#streak').textContent='Nivel '+level()+' · '+xp+' XP · Días juntos: '+days.length+' · Racha: '+n+(n>=2?' 🔥':'')+(enN?' · Práctica de inglés: '+enN:'');
+  $('#ckey').value=cfg.key||'';$('#cmodels').value=cfg.models||'';$('#curl').value=cfg.url||'';
+  $('#ckey2').value=cfg.key2||'';$('#cmodel2').value=cfg.model2||'';$('#curl2').value=cfg.url2||'';
+  $('#climit').value=cfg.limit;$('#cmode').value=mode;$('#ctheme').value=theme;$('#cpin').value=pin||'';$('#cnotes').value=notes||'';
+  var au=true;try{if(typeof A.getAutostart==='function')au=!!A.getAutostart()}catch(e){}
+  $('#cauto').checked=au;renderMem();paintHud();
+}
 $('#csave').onclick=function(){
-  cfg={key:$('#ckey').value.trim(),model:$('#cmodel').value.trim()||'openai/gpt-oss-120b',url:$('#curl').value.trim()||'https://api.groq.com/openai/v1/chat/completions'};
-  ss('rayo_cfg',cfg);tip=false;panel.classList.remove('cfgmode');
-  add('bot',cfg.key?'¡Listo! Ya tengo cerebro de IA. Cuéntame, ¿cómo te llamas y en qué andas hoy?':'Guardado. Sin clave solo puedo buscar datos.',true);
+  cfg={key:$('#ckey').value.trim(),models:$('#cmodels').value.trim()||'openai/gpt-oss-120b,llama-3.1-8b-instant',url:$('#curl').value.trim()||GROQ,key2:$('#ckey2').value.trim(),model2:$('#cmodel2').value.trim(),url2:$('#curl2').value.trim()||OR,limit:Math.max(10,parseInt($('#climit').value,10)||1000)};
+  ss('rayo_cfg',cfg);tip=false;cool={};
+  var p=$('#cpin').value.trim();pin=/^\d{4,6}$/.test(p)?p:'';ss('rayo_pin',pin);
+  theme=$('#ctheme').value;ss('rayo_theme',theme);applyTheme();
+  var nm=$('#cmode').value;
+  panel.classList.remove('cfgmode');paintHud();
+  var gm=cfg.key?'¡Listo! Ya tengo cerebro de IA'+(cfg.key2&&cfg.model2?' con respaldo':'')+'. Cuéntame, ¿cómo te llamas y en qué andas hoy?':'Guardado. Sin clave solo puedo buscar datos.';
+  add('bot',gm,true);if(cfg.key&&!hist.length){hist.push({role:'assistant',content:gm});ss('rayo_hist',hist)}
+  if(nm!==mode)setMode(nm);
 };
-$('#ctts').onchange=function(){ttsOn=this.checked;ss('rayo_tts',ttsOn);if(ttsOn)speak('Hola, soy Rayo. Ya puedo hablarte.')};
+$('#csavenotes').onclick=function(){notes=$('#cnotes').value.slice(0,20000);ss('rayo_notes',notes);$('#bkmsg2').textContent='Libreta guardada ('+notes.length+' letras).'};
+$('#ctts').onchange=function(){ttsOn=this.checked;ss('rayo_tts',ttsOn);paintVoz();if(ttsOn)speak('Hola, soy Rayo. Ya puedo hablarte.');else stopSpeak()};
+$('#cauto').onchange=function(){try{if(typeof A.setAutostart==='function')A.setAutostart(this.checked)}catch(e){}};
 $('#cgroq').onclick=function(){A.open('https://console.groq.com/keys')};
+$('#cor').onclick=function(){A.open('https://openrouter.ai/keys')};
 $('#cclearmem').onclick=function(){mem=[];ss('rayo_mem',mem);renderMem()};
 $('#cclearhist').onclick=function(){hist=[];ss('rayo_hist',hist);log.innerHTML='';panel.classList.remove('cfgmode');welcome()};
-$('#cfgb').onclick=function(){if(panel.classList.toggle('cfgmode'))loadCfg()};
+$('#bkgen').onclick=function(){
+  var d={v:2,mem:mem,hist:hist.slice(-20),notes:notes,xp:xp,days:days,mode:mode,theme:theme,en:enN,cfg:{models:cfg.models,url:cfg.url,model2:cfg.model2,url2:cfg.url2,limit:cfg.limit}};
+  var s=JSON.stringify(d);$('#bk').value=s;$('#bk').select();
+  try{var p=navigator.clipboard&&navigator.clipboard.writeText(s);if(p&&p.catch)p.catch(function(){})}catch(e){}
+  $('#bkmsg').textContent='Copia lista ('+s.length+' letras). Cópiala y guárdala en un lugar seguro, por ejemplo tus mensajes guardados. Sin tus claves.';
+};
+$('#bkres').onclick=function(){
+  try{
+    var d=JSON.parse($('#bk').value);if(!d||d.v!==2)throw new Error('x');
+    mem=d.mem||[];hist=d.hist||[];notes=d.notes||'';xp=d.xp||0;days=d.days||days;mode=d.mode||'normal';theme=d.theme||'neon';enN=d.en||0;
+    if(d.cfg){cfg.models=d.cfg.models||cfg.models;cfg.url=d.cfg.url||cfg.url;cfg.model2=d.cfg.model2||'';cfg.url2=d.cfg.url2||OR;cfg.limit=d.cfg.limit||1000}
+    ss('rayo_mem',mem);ss('rayo_hist',hist);ss('rayo_notes',notes);ss('rayo_xp',xp);ss('rayo_days',days);ss('rayo_mode',mode);ss('rayo_theme',theme);ss('rayo_en',enN);ss('rayo_cfg',cfg);
+    applyTheme();paintSub();loadCfg();$('#bkmsg').textContent='Copia restaurada. Tus claves se conservan.';
+  }catch(e){$('#bkmsg').textContent='Ese texto no es una copia válida de Rayo.'}
+};
+function openCfg(){
+  if(panel.classList.contains('cfgmode')){panel.classList.remove('cfgmode');return}
+  panel.classList.add('cfgmode');
+  var locked=pin&&!unlocked;
+  $('#lockbox').style.display=locked?'block':'none';$('#cfgbody').style.display=locked?'none':'block';
+  if(!locked)loadCfg();
+}
+$('#cfgb').onclick=openCfg;
+$('#lgo').onclick=function(){
+  if($('#lpin').value===pin){unlocked=true;$('#lpin').value='';$('#lmsg').textContent='';$('#lockbox').style.display='none';$('#cfgbody').style.display='block';loadCfg()}
+  else{$('#lmsg').textContent='PIN incorrecto';SND.err()}
+};
 
 // ---------- Interfaz ----------
-var Q=[['💵 Dólar','dolar'],['⛅ Clima','clima'],['📰 Noticias','noticias'],['🌎 Sismos','sismos']];
-var mb=document.createElement('button');mb.type='button';mb.textContent='☀️ Mi día';mb.onclick=miDia;$('#quick').appendChild(mb);
-Q.forEach(function(p){var b=document.createElement('button');b.type='button';b.textContent=p[0];b.onclick=function(){add('me',p[0],true);SND.send();run(p[1])};$('#quick').appendChild(b)});
 log.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-u]');if(a){e.preventDefault();A.open(a.getAttribute('data-u'))}});
 f.addEventListener('submit',function(e){e.preventDefault();ask(q.value)});
 function nombre(){for(var i=0;i<mem.length;i++){var m=mem[i].match(/(?:llama|nombre es|es)\s+([A-ZÁÉÍÓÚÑ][\wáéíóúñ]+)/);if(m)return m[1]}return ''}
 function saludo(){var h=+new Date().toLocaleString('en-US',{timeZone:'America/Lima',hour:'numeric',hour12:false});return h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'}
 function welcome(){
   if(hist.length){hist.slice(-10).forEach(function(m){if(m.role==='user')add('me',m.content,true);else add('bot',fmt(m.content))});var n=racha();add('bot',saludo()+(nombre()?', '+nombre():'')+'. '+(n>=2?'¡Llevamos '+n+' días seguidos! 🔥 ':'')+'¿En qué te ayudo hoy?',true);return}
-  add('bot',cfg.key?'¡Hola! Soy Rayo ⚡. Cuéntame, ¿cómo te llamas y en qué andas hoy?':'¡Hola! Soy Rayo ⚡. Toca ⚙️ para activar mi cerebro de IA con una clave gratis y poder conversar. Mientras tanto busco datos en internet.',true);
+  if(cfg.key){var g0='¡Hola! Soy Rayo ⚡. Cuéntame, ¿cómo te llamas y en qué andas hoy?';add('bot',g0,true);hist.push({role:'assistant',content:g0});ss('rayo_hist',hist);return}
+  add('bot','¡Hola! Soy Rayo ⚡. Toca ⚙️ para activar mi cerebro de IA con una clave gratis y poder conversar. Mientras tanto busco datos en internet.',true);
 }
 window.rayoToggle=function(o){
   o=o===undefined?!body.classList.contains('open'):o;
   var was=body.classList.contains('open');
   body.classList.toggle('open',o);panel.style.display=o?'flex':'none';
   if(o&&!log.children.length)welcome();
-  if(o!==was){if(o){SND.zap();SND.pop();buzz(18)}else SND.close()}
+  if(o!==was){if(o){SND.zap();SND.pop();buzz(18)}else{SND.close();stopSpeak();unlocked=false;panel.classList.remove('cfgmode')}}
   A.expand(o);
 };
 window.rayoTouch=function(k){
@@ -391,12 +593,17 @@ window.rayoLean=function(a){
 };
 document.getElementById('x').onclick=function(){window.rayoToggle(false)};
 pet.addEventListener('click',function(){if(body.classList.contains('open'))window.rayoToggle(false)});
+var voz=document.getElementById('voz');
+function paintVoz(){voz.style.opacity=ttsOn?1:.4;voz.title=ttsOn?'Voz activada':'Voz apagada'}
+paintVoz();
+voz.onclick=function(){ttsOn=!ttsOn;ss('rayo_tts',ttsOn);paintVoz();var c=$('#ctts');if(c)c.checked=ttsOn;if(ttsOn)speak('Hola, soy Rayo. Ya puedo hablarte.');else stopSpeak()};
 var snd=document.getElementById('snd');
 function paintSnd(){snd.textContent=soundOn?'🔊':'🔇'}
 paintSnd();
 snd.onclick=function(){soundOn=!soundOn;ss('rayo_snd',soundOn);paintSnd();if(soundOn){SND.pop();buzz(12)}};
 var walk=document.getElementById('walk');
 walk.onclick=function(){roam=!roam;walk.style.opacity=roam?1:.5;A.walk(roam)};
+paintSub();paintHud();
 })();
 
 </script></body></html>
