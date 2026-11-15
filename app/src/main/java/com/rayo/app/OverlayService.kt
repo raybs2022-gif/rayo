@@ -18,6 +18,8 @@ import android.net.Uri
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.WindowManager
@@ -123,6 +125,7 @@ class OverlayService : Service() {
         v.setBackgroundColor(Color.TRANSPARENT)
         v.settings.javaScriptEnabled = true
         v.settings.domStorageEnabled = true
+        v.settings.mediaPlaybackRequiresUserGesture = false
         @Suppress("DEPRECATION")
         v.settings.allowUniversalAccessFromFileURLs = true
         @Suppress("DEPRECATION")
@@ -154,11 +157,15 @@ class OverlayService : Service() {
                     startX = lp.x; startY = lp.y
                     moved = false
                     stopRoam()
+                    evaluateJavascript("window.rayoTouch&&rayoTouch('down')", null)
                 }
                 MotionEvent.ACTION_MOVE -> {
                     val dx = e.rawX - downX
                     val dy = e.rawY - downY
-                    if (!moved && hypot(dx, dy) > 8 * d) { moved = true; dragging = true }
+                    if (!moved && hypot(dx, dy) > 8 * d) {
+                        moved = true; dragging = true
+                        evaluateJavascript("window.rayoTouch&&rayoTouch('drag')", null)
+                    }
                     if (moved) {
                         lp.x = (startX + dx).toInt().coerceIn(0, max(0, sw - lp.width))
                         lp.y = (startY + dy).toInt().coerceIn(0, max(0, sh - lp.height))
@@ -169,7 +176,10 @@ class OverlayService : Service() {
                     val fueArrastre = moved
                     dragging = false
                     if (!fueArrastre) evaluateJavascript("rayoToggle(true)", null)
-                    else scheduleRoam(4000)
+                    else {
+                        evaluateJavascript("window.rayoTouch&&rayoTouch('drop')", null)
+                        scheduleRoam(4000)
+                    }
                 }
                 MotionEvent.ACTION_CANCEL -> {
                     dragging = false
@@ -200,6 +210,14 @@ class OverlayService : Service() {
                     startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 } catch (e: Exception) { }
             }
+        }
+
+        @JavascriptInterface
+        fun vibrate(ms: Int) {
+            try {
+                val vib = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                vib.vibrate(VibrationEffect.createOneShot(ms.toLong().coerceIn(1L, 200L), VibrationEffect.DEFAULT_AMPLITUDE))
+            } catch (e: Exception) { }
         }
 
         @JavascriptInterface
