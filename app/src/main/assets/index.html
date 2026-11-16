@@ -157,6 +157,9 @@ form{border-top:1px solid rgba(var(--nr),.25)!important;background:rgba(0,0,0,.2
 .m.bot{padding-right:34px}
 .m .cp{position:absolute;right:6px;bottom:6px;border:1px solid rgba(var(--nr),.4);background:rgba(var(--nr),.1);color:var(--text);border-radius:8px;width:24px;height:24px;font-size:.8rem;line-height:1;padding:0}
 .pic{max-width:100%;border-radius:10px;margin-top:6px;display:block;cursor:pointer;border:1px solid rgba(var(--nr),.3)}
+.mic{border:1px solid rgba(var(--nr),.5)!important;background:rgba(var(--nr),.1)!important;color:var(--text);border-radius:12px;padding:0 12px;font-size:1.05rem}
+.mic.on{background:#e5484d!important;border-color:#ff8a8a!important;box-shadow:0 0 16px #e5484d;animation:pulse .9s ease-in-out infinite}
+#pet.wake svg{filter:drop-shadow(0 0 5px var(--neon))}
 </style></head><body>
 <div id="panel">
   <div class="head"><div><b>RAYO ⚡</b><small id="sub"></small></div><button id="voz" aria-label="Voz" title="Voz de Rayo">🗣️</button><button id="snd" aria-label="Sonido" title="Sonido y vibración">🔊</button><button id="cfgb" aria-label="Ajustes" title="Ajustes">⚙️</button><button id="walk" aria-label="Paseo" title="Paseo">🏃</button><button id="x" aria-label="Cerrar">✕</button></div>
@@ -169,7 +172,8 @@ form{border-top:1px solid rgba(var(--nr),.25)!important;background:rgba(0,0,0,.2
     <div class="card"><h4>Cerebro de IA principal</h4><p class="h">1) Pulsa «Abrir Groq», crea tu cuenta y en <i>API Keys</i> crea una clave. 2) Pégala aquí.</p><button type="button" class="b2" id="cgroq">Abrir Groq</button><label>Clave</label><input id="ckey" type="password" autocomplete="off" placeholder="gsk_..."><label>Modelos (separados por coma; si el primero se agota, uso el siguiente)</label><input id="cmodels" autocomplete="off"><label>Dirección de la IA</label><input id="curl" autocomplete="off"></div>
     <div class="card"><h4>Respaldo (opcional)</h4><p class="h">Otro proveedor gratis como OpenRouter. Si el principal se agota, paso a este.</p><button type="button" class="b2" id="cor">Abrir OpenRouter</button><label>Clave</label><input id="ckey2" type="password" autocomplete="off"><label>Modelo</label><input id="cmodel2" autocomplete="off"><label>Dirección</label><input id="curl2" autocomplete="off"></div>
     <div class="card"><h4>Modo y apariencia</h4><label>Modo de Rayo</label><select id="cmode"><option value="normal">Normal</option><option value="ingles">Profesor de inglés</option></select><label>Tema de color</label><select id="ctheme"><option value="neon">Neón cian</option><option value="fuego">Fuego</option><option value="matrix">Matrix</option><option value="violeta">Violeta</option></select></div>
-    <div class="card"><h4>Voz e inicio</h4><label class="chk"><input type="checkbox" id="ctts"> Leer las respuestas en voz alta</label><label class="chk"><input type="checkbox" id="cauto"> Iniciar Rayo al prender el celular</label></div>
+    <div class="card"><h4>Voz e inicio</h4><label class="chk"><input type="checkbox" id="ctts"> Leer las respuestas en voz alta</label><label class="chk"><input type="checkbox" id="chands"> Conversación por voz continua (al terminar de hablar, vuelvo a escucharte)</label><label class="chk"><input type="checkbox" id="cauto"> Iniciar Rayo al prender el celular</label></div>
+    <div class="card"><h4>Oye Rayo (escucha siempre)</h4><label class="chk"><input type="checkbox" id="cwake"> Activar «Oye Rayo»</label><p class="h" id="wakest">Apagado</p><p class="h">Rayo escucha el micrófono, sin internet, solo para detectar «Oye Rayo». No graba ni guarda lo que dices. Gasta batería y verás el ícono del micrófono encendido. La primera vez descarga un modelo de voz de unos 40 MB (usa Wi-Fi).</p></div>
     <div class="card"><h4>Seguridad</h4><label>PIN para abrir ajustes (4 a 6 dígitos, vacío = sin PIN)</label><input id="cpin" type="password" inputmode="numeric" maxlength="6"></div>
     <button type="button" class="b1" id="csave">Guardar ajustes</button>
     <div class="card" style="margin-top:12px"><h4>Lo que sé de ti</h4><div id="memlist"></div><button type="button" class="b2" id="ccopyall">Copiar toda la conversación</button><button type="button" class="b2" id="cclearmem">Borrar mi memoria</button><button type="button" class="b2" id="cclearhist">Borrar la conversación</button><p class="h">Para enseñarme algo al instante escribe «Aprende: …». Para quitarlo, «Olvida: …».</p></div>
@@ -178,7 +182,7 @@ form{border-top:1px solid rgba(var(--nr),.25)!important;background:rgba(0,0,0,.2
    </div>
   </div>
   <div id="log"></div>
-  <form id="f"><input id="q" placeholder="Escribe una pregunta o comando…" autocomplete="off"><button class="send" id="s">➤</button></form>
+  <form id="f"><input id="q" placeholder="Escribe una pregunta o comando…" autocomplete="off"><button type="button" class="mic" id="mic" aria-label="Hablar" title="Hablarle a Rayo">🎤</button><button class="send" id="s">➤</button></form>
 </div>
 <div id="pet"><svg viewBox="0 0 100 100" aria-hidden="true">
     <defs><clipPath id="ph"><circle cx="50" cy="58" r="37"/></clipPath>
@@ -224,6 +228,7 @@ var mem=ls('rayo_mem',[]),hist=ls('rayo_hist',[]),nuser=ls('rayo_n',0),tip=false
 var notes=ls('rayo_notes',''),mode=ls('rayo_mode','normal'),theme=ls('rayo_theme','neon'),xp=ls('rayo_xp',0),enN=ls('rayo_en',0);
 var pin=ls('rayo_pin',''),unlocked=false,cache=ls('rayo_cache',{}),use=ls('rayo_use',{d:'',n:0,m:{}}),cool={},mc={},warned=ls('rayo_warn','');
 var days=ls('rayo_days',[]);
+var handsOn=ls('rayo_hands',false),voiceMode=false,listening=false;
 if(days[days.length-1]!==today){days.push(today);days=days.slice(-90);ss('rayo_days',days)}
 function racha(){var n=0,d=new Date(today+'T12:00:00Z');for(var i=days.length-1;i>=0;i--){if(days[i]===d.toISOString().slice(0,10)){n++;d.setUTCDate(d.getUTCDate()-1)}else break}return n}
 function level(){return Math.floor(Math.sqrt(xp/25))+1}
@@ -397,7 +402,7 @@ function sys(t){
   var s='Eres Rayo, una mascota flotante veloz y futurista, inspirada en los superhéroes velocistas. Conversas como un amigo inteligente y cercano. Respondes en el idioma del usuario (por defecto español), claro, cálido y directo; breve salvo que pidan detalle. Puedes explicar, aconsejar, redactar, traducir, calcular y dar ideas sobre casi cualquier tema. No inventes datos: si no sabes algo, dilo. '+
   'Fecha y hora en Lima, Perú: '+ahora+'. '+
   'Si el mensaje trae un bloque [DATOS DE INTERNET], úsalo para los datos actuales y menciona la fuente; si no alcanza, dilo con honestidad. Sin ese bloque no tienes datos en tiempo real. '+
-  'En temas médicos, legales o financieros informa y sugiere consultar a un profesional. Formato: texto sencillo, **negrita** y listas con guiones. Puedes incluir enlaces con el formato [texto](https://...). Si piden videos, da un enlace de búsqueda de YouTube (https://www.youtube.com/results?search_query=...). Si piden imágenes, dile que escriba «imagen de …». Si piden abrir una app, dile que escriba «abre …». ';
+  'En temas médicos, legales o financieros informa y sugiere consultar a un profesional. Formato: texto sencillo, **negrita** y listas con guiones. Puedes incluir enlaces con el formato [texto](https://...). Si piden videos, da un enlace de búsqueda de YouTube (https://www.youtube.com/results?search_query=...). Si piden imágenes, dile que escriba «imagen de …». Si piden abrir una app, dile que escriba «abre …». También puede decir «llama a …», «pon una alarma a las 7:30», «temporizador de 5 minutos», «llévame a …» o «busca en Google …». ';
   if(mode==='ingles')s+='MODO PROFESOR DE INGLÉS: conversa con el usuario en inglés sencillo y claro, adaptado a su nivel (pregúntaselo si no lo sabes). Pon la traducción al español entre paréntesis solo cuando haga falta. Si comete errores, corrígelos con amabilidad mostrando la frase corregida y una explicación corta. Termina casi siempre con una pregunta para que siga practicando. Si pide la palabra del día, dale una palabra con ejemplo y traducción. ';
   s+=mem.length?'LO QUE SABES DEL USUARIO (úsalo con naturalidad, sin recitarlo): '+mem.join('; ')+'. ':'Aún no conoces al usuario: si surge de forma natural, pregúntale su nombre y a qué se dedica. Si le preguntaste su nombre y responde con una sola palabra, esa palabra ES su nombre: salúdalo por su nombre y continúa sin volver a presentarte. ';
   var n=notasRel(t||'');if(n)s+='DATOS DE SU LIBRETA PERSONAL (úsalos si ayudan): '+n+' ';
@@ -460,6 +465,7 @@ async function respond(t,ctxOver){
     hist.push({role:'user',content:t},{role:'assistant',content:out});hist=hist.slice(-30);ss('rayo_hist',hist);
     if(mode==='ingles'){enN++;ss('rayo_en',enN)}
     busy=false;sb.disabled=false;
+    if(handsOn&&voiceMode&&!ttsOn)setTimeout(escuchar,700);
     addXp(5);
     if(!fromCache)aprender(t,out);
   }catch(e){b.textContent=errMsg(e);SND.err()}
@@ -517,6 +523,48 @@ function abrirApp(name){
   var k=name.toLowerCase();if(SITIOS[k]){add('bot','No encontré esa app, pero abro su página web. ⚡',true);A.open(SITIOS[k]);return true}
   return false;
 }
+function dice(msg){add('bot',msg,true);SND.recv();speak(msg)}
+function llamar(nombre){
+  if(typeof A.callContact!=='function')return false;
+  var r='';try{r=A.callContact(nombre)}catch(e){r='error'}
+  if(r==='perm')add('bot','Necesito permiso para ver tus contactos y llamar. Acéptalo y repite el comando.',true);
+  else if(r==='none')dice('No encontré a «'+nombre+'» en tus contactos.');
+  else if(r.indexOf('ok:')===0){var p=r.slice(3).split('|');dice(p[1]==='dial'?'Abrí el marcador con '+p[0]+'. Toca el botón de llamar.':'Llamando a '+p[0]+'. ⚡');buzz(25)}
+  else dice('No pude iniciar la llamada.');
+  return true;
+}
+function alarma(t){
+  if(!/alarma/i.test(t)||typeof A.setAlarm!=='function')return false;
+  var m=t.match(/(?:a las|para las|a la|para la)\s+(\d{1,2})(?:\s*(?::|\.|con|y)?\s*(\d{2}))?\s*(am|pm|a\.\s?m\.|p\.\s?m\.|de la ma[nñ]ana|de la tarde|de la noche)?/i);
+  if(!m)return false;
+  var h=parseInt(m[1],10),mi=m[2]?parseInt(m[2],10):0,suf=((t.match(/(am|pm|a\.\s?m\.|p\.\s?m\.|de la ma[nñ]ana|de la tarde|de la noche|de la madrugada)/i)||[''])[0]).toLowerCase();
+  if(/y media/i.test(t))mi=30;else if(/y cuarto/i.test(t))mi=15;else if(/menos cuarto/i.test(t)){h=(h+23)%24;mi=45}
+  if(/pm|p\.|tarde|noche/.test(suf)&&h<12)h+=12;else if(/am|a\.|ma[nñ]ana|madrugada/.test(suf)&&h===12)h=0;
+  if(h>23||mi>59)return false;
+  var ok=false;try{ok=A.setAlarm(h,mi)}catch(e){}
+  dice(ok?'Listo, puse una alarma a las '+('0'+h).slice(-2)+':'+('0'+mi).slice(-2)+'. ⏰':'No pude poner la alarma.');
+  return true;
+}
+function temporizador(t){
+  var m=t.match(/(?:temporizador|cron[oó]metro|av[ií]same en|despi[eé]rtame en)\s+(?:de |por )?(\d+)\s*(segundos?|minutos?|horas?)/i);
+  if(!m||typeof A.setTimer!=='function')return false;
+  var n=parseInt(m[1],10),u=m[2].toLowerCase(),s=u.indexOf('hora')===0?n*3600:u.indexOf('min')===0?n*60:n;
+  var ok=false;try{ok=A.setTimer(s)}catch(e){}
+  dice(ok?'Listo, temporizador de '+n+' '+m[2].toLowerCase()+'. ⏱️':'No pude poner el temporizador.');
+  return true;
+}
+function comandoLocal(t){
+  var m,tz={timeZone:'America/Lima'};
+  if(/^¿?\s*(qu[eé] hora es|me das la hora|dime la hora)\s*\??$/i.test(t)){dice('Son las '+new Date().toLocaleTimeString('es-PE',{timeZone:'America/Lima',hour:'numeric',minute:'2-digit'})+'.');return true}
+  if(/^¿?\s*(qu[eé] d[ií]a es hoy|qu[eé] fecha es hoy|en qu[eé] fecha estamos)\s*\??$/i.test(t)){dice('Hoy es '+new Date().toLocaleDateString('es-PE',{timeZone:'America/Lima',dateStyle:'full'})+'.');return true}
+  if(/^(hola|buenas|buenos d[ií]as|buenas tardes|buenas noches|saludos|saluda|qu[eé] tal)( rayo)?[\s!.¡]*$/i.test(t)){dice(saludo()+(nombre()?', '+nombre():'')+'. ¿En qué te ayudo?');return true}
+  if((m=t.match(/^(?:ll[aá]ma(?:me)?|llamar|marca|marcar|comun[ií]came con)\s+(?:a |al |a la |con )?(.+)$/i))&&llamar(m[1].replace(/[?¿.!]+$/,'').trim()))return true;
+  if(alarma(t))return true;
+  if(temporizador(t))return true;
+  if((m=t.match(/^(?:navega|ll[eé]vame|ruta|c[oó]mo llego|c[oó]mo llegar|gu[ií]ame)\s+(?:a |al |hasta |hacia )?(.+)$/i))){var d=m[1].replace(/[?¿.!]+$/,'');dice('Abriendo la ruta a «'+d+'» en Mapas.');A.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(d));return true}
+  if((m=t.match(/^(?:busca en google|googlea|busca en internet|b[uú]scalo en google)\s+(.+)$/i))){var b=m[1].replace(/[?¿.!]+$/,'');dice('Buscando «'+b+'» en Google.');A.open('https://www.google.com/search?q='+encodeURIComponent(b));return true}
+  return false;
+}
 async function ask(t){
   t=t.trim();if(!t||busy)return;
   add('me',t,true);q.value='';SND.send();
@@ -529,6 +577,7 @@ async function ask(t){
   if((m=t.match(/^(?:abre|abrir|abreme|ábreme|lanza|ir a|vamos a)\s+(?:la app de |la aplicaci[oó]n de |la app |el |la )?(.+)$/i))&&abrirApp(m[1].replace(/[?¿.!]+$/,'').trim()))return;
   if(/^\/?(modo )?ingl[eé]s$/i.test(t)){setMode('ingles');return}
   if(/^\/?(modo )?normal$/i.test(t)){setMode('normal');return}
+  if(comandoLocal(t))return;
   if(!cfg.key){sinClave(t);return}
   respond(t);
 }
@@ -540,13 +589,13 @@ function renderMem(){
   mem.forEach(function(x,i){var d=document.createElement('div');d.className='mi';var s=document.createElement('span');s.textContent=x;var b=document.createElement('button');b.type='button';b.textContent='✕';b.onclick=function(){mem.splice(i,1);ss('rayo_mem',mem);renderMem()};d.appendChild(s);d.appendChild(b);box.appendChild(d)});
 }
 function loadCfg(){
-  $('#ctts').checked=!!ttsOn;var n=racha();
+  $('#ctts').checked=!!ttsOn;$('#chands').checked=!!handsOn;var n=racha();
   $('#streak').textContent='Nivel '+level()+' · '+xp+' XP · Días juntos: '+days.length+' · Racha: '+n+(n>=2?' 🔥':'')+(enN?' · Práctica de inglés: '+enN:'');
   $('#ckey').value=cfg.key||'';$('#cmodels').value=cfg.models||'';$('#curl').value=cfg.url||'';
   $('#ckey2').value=cfg.key2||'';$('#cmodel2').value=cfg.model2||'';$('#curl2').value=cfg.url2||'';
   $('#climit').value=cfg.limit;$('#cmode').value=mode;$('#ctheme').value=theme;$('#cpin').value=pin||'';$('#cnotes').value=notes||'';
   var au=true;try{if(typeof A.getAutostart==='function')au=!!A.getAutostart()}catch(e){}
-  $('#cauto').checked=au;renderMem();paintHud();
+  $('#cauto').checked=au;var wk=false;try{if(typeof A.wakeGet==='function')wk=!!A.wakeGet()}catch(e){}$('#cwake').checked=wk;$('#wakest').textContent=wk?'Activado':'Apagado';renderMem();paintHud();
 }
 $('#csave').onclick=function(){
   cfg={key:$('#ckey').value.trim(),models:$('#cmodels').value.trim()||'openai/gpt-oss-120b,llama-3.1-8b-instant',url:$('#curl').value.trim()||GROQ,key2:$('#ckey2').value.trim(),model2:$('#cmodel2').value.trim(),url2:$('#curl2').value.trim()||OR,limit:Math.max(10,parseInt($('#climit').value,10)||1000)};
@@ -561,6 +610,12 @@ $('#csave').onclick=function(){
 };
 $('#csavenotes').onclick=function(){notes=$('#cnotes').value.slice(0,20000);ss('rayo_notes',notes);$('#bkmsg2').textContent='Libreta guardada ('+notes.length+' letras).'};
 $('#ctts').onchange=function(){ttsOn=this.checked;ss('rayo_tts',ttsOn);paintVoz();if(ttsOn)speak('Hola, soy Rayo. Ya puedo hablarte.');else stopSpeak()};
+$('#chands').onchange=function(){handsOn=this.checked;ss('rayo_hands',handsOn)};
+$('#cwake').onchange=function(){
+  if(typeof A.wakeSet!=='function'){this.checked=false;$('#wakest').textContent='Solo funciona en la app instalada en el celular';return}
+  $('#wakest').textContent=this.checked?'Activando…':'Apagado';
+  try{A.wakeSet(this.checked)}catch(e){}
+};
 $('#cauto').onchange=function(){try{if(typeof A.setAutostart==='function')A.setAutostart(this.checked)}catch(e){}};
 $('#cgroq').onclick=function(){A.open('https://console.groq.com/keys')};
 $('#cor').onclick=function(){A.open('https://openrouter.ai/keys')};
@@ -606,7 +661,7 @@ function copyText(t){
   try{if(typeof A.copy==='function'){A.copy(t);return}}catch(e){}
   try{var p=navigator.clipboard&&navigator.clipboard.writeText(t);if(p&&p.catch)p.catch(function(){})}catch(e){}
 }
-f.addEventListener('submit',function(e){e.preventDefault();ask(q.value)});
+f.addEventListener('submit',function(e){e.preventDefault();voiceMode=false;ask(q.value)});
 function nombre(){for(var i=0;i<mem.length;i++){var m=mem[i].match(/(?:llama|nombre es|es)\s+([A-ZÁÉÍÓÚÑ][\wáéíóúñ]+)/);if(m)return m[1]}return ''}
 function saludo(){var h=+new Date().toLocaleString('en-US',{timeZone:'America/Lima',hour:'numeric',hour12:false});return h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'}
 function welcome(){
@@ -619,7 +674,7 @@ window.rayoToggle=function(o){
   var was=body.classList.contains('open');
   body.classList.toggle('open',o);panel.style.display=o?'flex':'none';
   if(o&&!log.children.length)welcome();
-  if(o!==was){if(o){SND.zap();SND.pop();buzz(18)}else{SND.close();stopSpeak();unlocked=false;panel.classList.remove('cfgmode')}}
+  if(o!==was){if(o){SND.zap();SND.pop();buzz(18)}else{SND.close();stopSpeak();unlocked=false;panel.classList.remove('cfgmode');if(listening){try{A.stopListen()}catch(e){}stopMic()}voiceMode=false}}
   A.expand(o);
 };
 window.rayoTouch=function(k){
@@ -635,6 +690,57 @@ window.rayoLean=function(a){
   else if(m>0){pet.classList.remove('dash');pet.classList.add('walk');if(!was)SND.step()}
   else{pet.classList.remove('dash','walk');if(was)landFx(was>=14)}
   lastLean=a;
+};
+var mic=document.getElementById('mic');
+function escuchar(){
+  if(!body.classList.contains('open')||busy)return;
+  if(typeof A.listen!=='function'){add('bot','El micrófono solo funciona dentro de la app Rayo instalada en el celular.',true);return}
+  q.blur();A.listen(mode==='ingles'?'en':'es');
+}
+function stopMic(){listening=false;mic.classList.remove('on');q.placeholder='Escribe una pregunta o comando…'}
+mic.onclick=function(){
+  if(listening){try{A.stopListen()}catch(e){}stopMic();voiceMode=false;return}
+  voiceMode=true;escuchar();
+};
+window.rayoQuickVoice=function(){voiceMode=true;setTimeout(escuchar,350)};
+var wakePending=false;
+window.rayoSpoke=function(){
+  if(wakePending){wakePending=false;setTimeout(escuchar,350);return}
+  if(handsOn&&voiceMode&&!busy&&body.classList.contains('open'))setTimeout(escuchar,450);
+};
+window.rayoWake=function(){
+  SND.level();buzz(30);pet.classList.add('happy');setTimeout(function(){pet.classList.remove('happy')},700);
+  voiceMode=true;
+  if(ttsOn&&typeof A.speak==='function'){wakePending=true;speak(mode==='ingles'?'Yes?':'¿Sí?');setTimeout(function(){if(wakePending){wakePending=false;escuchar()}},3000)}
+  else setTimeout(escuchar,500);
+};
+window.rayoWakeState=function(st){
+  st=String(st);var el=$('#wakest'),ck=$('#cwake');
+  if(st==='wake:on'){pet.classList.add('wake');if(el)el.textContent='Escuchando «Oye Rayo»…';if(ck)ck.checked=true}
+  else if(st==='wake:off'){pet.classList.remove('wake');if(el)el.textContent='Apagado';if(ck)ck.checked=false}
+  else if(st==='wake:heard'){pet.classList.remove('wake')}
+  else if(st==='wake:loading'){if(el)el.textContent='Preparando el modelo de voz…'}
+  else if(st.indexOf('wake:download:')===0){if(el)el.textContent='Descargando voz… '+st.slice(14)+'%'}
+  else if(st==='wake:nomic'){pet.classList.remove('wake');if(el)el.textContent='Falta el permiso del micrófono';if(ck)ck.checked=false;add('bot','Para «Oye Rayo» necesito el permiso del micrófono. Activa de nuevo la opción en ⚙️ y acéptalo.',true)}
+  else if(st.indexOf('wake:error:')===0){pet.classList.remove('wake');if(el)el.textContent='No pude activarlo';if(ck)ck.checked=false;add('bot','No pude activar «Oye Rayo» ('+st.slice(11)+'). Revisa tu internet para la descarga y vuelve a intentarlo.',true)}
+};
+window.rayoVoz=function(m){
+  m=String(m);
+  if(m==='listening'){listening=true;mic.classList.add('on');q.placeholder='Escuchando… habla ahora';SND.pop();buzz(15)}
+  else if(m.indexOf('partial:')===0){q.value=m.slice(8)}
+  else if(m.indexOf('final:')===0){stopMic();var t=m.slice(6).trim();q.value='';if(t){voiceMode=true;ask(t)}else{voiceMode=false;add('bot','No te escuché bien. Toca 🎤 e inténtalo otra vez.',true)}}
+  else if(m==='cancel'){stopMic();voiceMode=false;q.value=''}
+  else if(m==='permisos:ok'){add('bot','Listo, ya tengo permiso. Repite el comando.',true)}
+  else if(m==='permisos:no'){add('bot','Sin ese permiso no puedo hacerlo. Puedes darlo en Ajustes del celular, Aplicaciones, Rayo.',true)}
+  else if(m==='nomic'){stopMic();voiceMode=false;add('bot','Necesito permiso para usar el micrófono. Toca 🎤 otra vez y acepta el permiso.',true)}
+  else if(m==='noreco'){stopMic();voiceMode=false;add('bot','Tu celular no tiene reconocimiento de voz disponible. Revisa que esté activo «Servicios de voz de Google».',true)}
+  else if(m.indexOf('error:')===0){
+    stopMic();q.value='';var c=parseInt(m.slice(6),10);
+    if(c===9){voiceMode=false;add('bot','Necesito permiso para usar el micrófono. Toca 🎤 otra vez y acepta el permiso.',true)}
+    else if(c===1||c===2||c===4){voiceMode=false;add('bot','No pude conectar con el reconocimiento de voz. Revisa tu internet.',true)}
+    else if(c===6||c===7){if(!handsOn)voiceMode=false;if(!handsOn)add('bot','No te escuché bien. Toca 🎤 e inténtalo otra vez.',true)}
+    else{voiceMode=false}
+  }
 };
 document.getElementById('x').onclick=function(){window.rayoToggle(false)};
 pet.addEventListener('click',function(){if(body.classList.contains('open'))window.rayoToggle(false)});

@@ -11,8 +11,8 @@ android {
         applicationId = "com.rayo.app"
         minSdk = 26
         targetSdk = 33
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.0"
     }
     buildTypes {
         release { isMinifyEnabled = false }
@@ -22,4 +22,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
+    packaging {
+        jniLibs { useLegacyPackaging = true }
+    }
+}
+
+dependencies {
+    implementation("com.alphacephei:vosk-android:0.3.47")
+    implementation("net.java.dev.jna:jna:5.13.0@aar")
 }

@@ -1,5 +1,6 @@
 package com.rayo.app
 
+import android.Manifest
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
@@ -11,16 +12,22 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.Icon
 import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.provider.AlarmClock
+import android.provider.ContactsContract
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import java.util.Locale
 import android.view.Gravity
 import android.view.MotionEvent
@@ -40,6 +47,9 @@ class OverlayService : Service() {
     companion object {
         const val ACTION_STOP = "com.rayo.app.STOP"
         const val CHANNEL = "rayo"
+
+        @Volatile
+        var instance: OverlayService? = null
         private const val FLAGS_COLLAPSED =
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
@@ -71,6 +81,109 @@ class OverlayService : Service() {
 
     private val roamRunnable = Runnable { roamStep() }
 
+    // "Oye Rayo": escucha continua
+    private var wake: WakeEngine? = null
+    private var hablando = false
+    private val reanudarRun = Runnable { wakeReanudarYa() }
+    private fun prefs() = getSharedPreferences("rayo", Context.MODE_PRIVATE)
+
+    override fun onCreate() {
+        super.onCreate()
+        instance = this
+    }
+
+    // Mensajes que llegan desde la pantalla de voz hacia la página de Rayo
+    fun enviarVoz(msg: String) {
+        handler.post {
+            view?.evaluateJavascript("window.rayoVoz&&rayoVoz(" + org.json.JSONObject.quote(msg) + ")", null)
+            if (msg.startsWith("final:") || msg.startsWith("error:") || msg == "cancel" ||
+                msg == "nomic" || msg == "noreco" || msg.startsWith("permisos:")
+            ) {
+                wakeReanudar(3000)
+            }
+        }
+    }
+
+    fun estadoWake(s: String) {
+        handler.post {
+            view?.evaluateJavascript("window.rayoWakeState&&rayoWakeState(" + org.json.JSONObject.quote(s) + ")", null)
+            if (s == "wake:on") actualizarNotif(true) else if (s == "wake:off" || s.startsWith("wake:error") || s == "wake:nomic") actualizarNotif(false)
+        }
+    }
+
+    fun wakeTrasPermiso() {
+        handler.post {
+            prefs().edit().putBoolean("wake", true).apply()
+            startInForeground()
+            wakeIniciar()
+        }
+    }
+
+    private fun wakeActivar(on: Boolean) {
+        prefs().edit().putBoolean("wake", on).apply()
+        if (on) {
+            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                try {
+                    startActivity(
+                        Intent(this, VozActivity::class.java)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            .putExtra("perm", true)
+                    )
+                } catch (e: Exception) {
+                    estadoWake("wake:nomic")
+                }
+                return
+            }
+            startInForeground()
+            wakeIniciar()
+        } else {
+            handler.removeCallbacks(reanudarRun)
+            wake?.detener()
+            estadoWake("wake:off")
+            startInForeground()
+        }
+    }
+
+    private fun wakeIniciar() {
+        if (wake == null) {
+            wake = WakeEngine(applicationContext, { st -> estadoWake(st) }, { alDespertar() })
+        }
+        wake?.iniciar()
+    }
+
+    private fun wakePausar() {
+        handler.removeCallbacks(reanudarRun)
+        wake?.detener()
+    }
+
+    private fun wakeReanudar(ms: Long) {
+        handler.removeCallbacks(reanudarRun)
+        if (prefs().getBoolean("wake", false)) handler.postDelayed(reanudarRun, ms)
+    }
+
+    private fun wakeReanudarYa() {
+        if (!prefs().getBoolean("wake", false)) return
+        if (hablando || VozActivity.actual != null) {
+            handler.postDelayed(reanudarRun, 1500)
+            return
+        }
+        wakeIniciar()
+    }
+
+    private fun alDespertar() {
+        wake?.detener()
+        estadoWake("wake:heard")
+        view?.evaluateJavascript("rayoToggle(true);window.rayoWake&&rayoWake()", null)
+    }
+
+    private fun actualizarNotif(escuchando: Boolean) {
+        try {
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            nm.notify(1, construirNotif(escuchando))
+        } catch (e: Exception) {
+        }
+    }
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -80,14 +193,15 @@ class OverlayService : Service() {
         }
         startInForeground()
         if (view == null) crearOverlay()
+        if (prefs().getBoolean("wake", false) &&
+            checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        ) {
+            wakeIniciar()
+        }
         return START_STICKY
     }
 
-    private fun startInForeground() {
-        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        nm.createNotificationChannel(
-            NotificationChannel(CHANNEL, "Rayo", NotificationManager.IMPORTANCE_LOW)
-        )
+    private fun construirNotif(escuchando: Boolean): Notification {
         val stopIntent = PendingIntent.getService(
             this, 1,
             Intent(this, OverlayService::class.java).setAction(ACTION_STOP),
@@ -98,14 +212,35 @@ class OverlayService : Service() {
             "Cerrar Rayo",
             stopIntent
         ).build()
-        val notif = Notification.Builder(this, CHANNEL)
+        return Notification.Builder(this, CHANNEL)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("Rayo está activo")
+            .setContentTitle(if (escuchando) "Rayo te escucha: di «Oye Rayo»" else "Rayo está activo")
             .setContentText("Toca «Cerrar Rayo» para quitarlo")
             .addAction(action)
             .setOngoing(true)
             .build()
-        startForeground(1, notif)
+    }
+
+    private fun startInForeground() {
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.createNotificationChannel(
+            NotificationChannel(CHANNEL, "Rayo", NotificationManager.IMPORTANCE_LOW)
+        )
+        val notif = construirNotif(wake?.corriendo == true)
+        if (Build.VERSION.SDK_INT >= 30) {
+            val conMic = checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+            try {
+                startForeground(1, notif, if (conMic) ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE else 0)
+            } catch (e: Exception) {
+                try {
+                    startForeground(1, notif, 0)
+                } catch (e2: Exception) {
+                    startForeground(1, notif)
+                }
+            }
+        } else {
+            startForeground(1, notif)
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -163,6 +298,25 @@ class OverlayService : Service() {
             if (status == TextToSpeech.SUCCESS && t != null) {
                 usarEspanol(t)
                 t.setSpeechRate(1.05f)
+                t.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                    override fun onStart(utteranceId: String?) {}
+
+                    override fun onDone(utteranceId: String?) {
+                        handler.post {
+                            hablando = false
+                            wakeReanudar(1500)
+                            view?.evaluateJavascript("window.rayoSpoke&&rayoSpoke()", null)
+                        }
+                    }
+
+                    override fun onError(utteranceId: String?) {
+                        handler.post {
+                            hablando = false
+                            wakeReanudar(1500)
+                            view?.evaluateJavascript("window.rayoSpoke&&rayoSpoke()", null)
+                        }
+                    }
+                })
                 ttsReady = true
             }
         }
@@ -176,6 +330,13 @@ class OverlayService : Service() {
         private var startX = 0
         private var startY = 0
         private var moved = false
+        private var longDone = false
+        private val longRun = Runnable {
+            if (!moved && !expanded) {
+                longDone = true
+                evaluateJavascript("rayoToggle(true);window.rayoQuickVoice&&rayoQuickVoice()", null)
+            }
+        }
 
         override fun onTouchEvent(e: MotionEvent): Boolean {
             if (expanded) return super.onTouchEvent(e)
@@ -184,6 +345,9 @@ class OverlayService : Service() {
                     downX = e.rawX; downY = e.rawY
                     startX = lp.x; startY = lp.y
                     moved = false
+                    longDone = false
+                    handler.removeCallbacks(longRun)
+                    handler.postDelayed(longRun, 650)
                     stopRoam()
                     evaluateJavascript("window.rayoTouch&&rayoTouch('down')", null)
                 }
@@ -192,6 +356,7 @@ class OverlayService : Service() {
                     val dy = e.rawY - downY
                     if (!moved && hypot(dx, dy) > 8 * d) {
                         moved = true; dragging = true
+                        handler.removeCallbacks(longRun)
                         evaluateJavascript("window.rayoTouch&&rayoTouch('drag')", null)
                     }
                     if (moved) {
@@ -203,13 +368,17 @@ class OverlayService : Service() {
                 MotionEvent.ACTION_UP -> {
                     val fueArrastre = moved
                     dragging = false
-                    if (!fueArrastre) evaluateJavascript("rayoToggle(true)", null)
+                    handler.removeCallbacks(longRun)
+                    if (longDone) {
+                        // pulsación larga: ya se abrió el chat y se está escuchando
+                    } else if (!fueArrastre) evaluateJavascript("rayoToggle(true)", null)
                     else {
                         evaluateJavascript("window.rayoTouch&&rayoTouch('drop')", null)
                         scheduleRoam(4000)
                     }
                 }
                 MotionEvent.ACTION_CANCEL -> {
+                    handler.removeCallbacks(longRun)
                     dragging = false
                     scheduleRoam(3000)
                 }
@@ -246,6 +415,8 @@ class OverlayService : Service() {
                 val t = tts
                 if (ttsReady && t != null) {
                     if (hablaIngles) { usarEspanol(t); hablaIngles = false }
+                    hablando = true
+                    wakePausar()
                     t.speak(text, TextToSpeech.QUEUE_FLUSH, null, "rayo")
                 }
             }
@@ -263,6 +434,8 @@ class OverlayService : Service() {
                         usarEspanol(t)
                         hablaIngles = false
                     }
+                    hablando = true
+                    wakePausar()
                     t.speak(text, TextToSpeech.QUEUE_FLUSH, null, "rayo")
                 }
             }
@@ -278,7 +451,116 @@ class OverlayService : Service() {
             getSharedPreferences("rayo", Context.MODE_PRIVATE).getBoolean("autostart", true)
 
         @JavascriptInterface
-        fun stopSpeak() { handler.post { tts?.stop() } }
+        fun stopSpeak() { handler.post { tts?.stop(); hablando = false; wakeReanudar(800) } }
+
+        @JavascriptInterface
+        fun listen(lang: String) {
+            handler.post {
+                tts?.stop()
+                hablando = false
+                wakePausar()
+                val i = Intent(this@OverlayService, VozActivity::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    .putExtra("lang", lang)
+                try {
+                    startActivity(i)
+                } catch (e: Exception) {
+                    view?.evaluateJavascript("window.rayoVoz&&rayoVoz('noreco')", null)
+                }
+            }
+        }
+
+        @JavascriptInterface
+        fun stopListen() { handler.post { VozActivity.cancelar() } }
+
+        @JavascriptInterface
+        fun wakeSet(on: Boolean) { handler.post { wakeActivar(on) } }
+
+        @JavascriptInterface
+        fun wakeGet(): Boolean = prefs().getBoolean("wake", false)
+
+        @JavascriptInterface
+        fun callContact(name: String): String {
+            return try {
+                val q = name.trim()
+                val soloNumero = q.length >= 6 && q.all { it.isDigit() || it == ' ' || it == '+' || it == '-' || it == '(' || it == ')' }
+                var nombre = q
+                var numero = ""
+                if (soloNumero) {
+                    numero = q.filter { it.isDigit() || it == '+' }
+                } else {
+                    val faltan = listOf(Manifest.permission.READ_CONTACTS, Manifest.permission.CALL_PHONE)
+                        .filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
+                    if (faltan.contains(Manifest.permission.READ_CONTACTS)) {
+                        handler.post {
+                            try {
+                                startActivity(
+                                    Intent(this@OverlayService, VozActivity::class.java)
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        .putExtra("pedir", faltan.toTypedArray())
+                                )
+                            } catch (e: Exception) { }
+                        }
+                        return "perm"
+                    }
+                    val cur = contentResolver.query(
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                        arrayOf(
+                            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                            ContactsContract.CommonDataKinds.Phone.NUMBER
+                        ),
+                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " LIKE ?",
+                        arrayOf("%$q%"),
+                        null
+                    )
+                    cur?.use { c ->
+                        if (c.moveToFirst()) {
+                            nombre = c.getString(0) ?: q
+                            numero = c.getString(1) ?: ""
+                        }
+                    }
+                }
+                if (numero.isEmpty()) return "none"
+                val puedeLlamar = checkSelfPermission(Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED
+                val accion = if (puedeLlamar) Intent.ACTION_CALL else Intent.ACTION_DIAL
+                val i = Intent(accion, Uri.parse("tel:" + Uri.encode(numero))).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                handler.post {
+                    try { startActivity(i) } catch (e: Exception) { }
+                }
+                "ok:" + nombre + (if (puedeLlamar) "" else "|dial")
+            } catch (e: Exception) {
+                "error"
+            }
+        }
+
+        @JavascriptInterface
+        fun setAlarm(hora: Int, minutos: Int): Boolean {
+            return try {
+                val i = Intent(AlarmClock.ACTION_SET_ALARM)
+                    .putExtra(AlarmClock.EXTRA_HOUR, hora)
+                    .putExtra(AlarmClock.EXTRA_MINUTES, minutos)
+                    .putExtra(AlarmClock.EXTRA_SKIP_UI, true)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                handler.post { try { startActivity(i) } catch (e: Exception) { } }
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
+
+        @JavascriptInterface
+        fun setTimer(segundos: Int): Boolean {
+            return try {
+                val i = Intent(AlarmClock.ACTION_SET_TIMER)
+                    .putExtra(AlarmClock.EXTRA_LENGTH, segundos)
+                    .putExtra(AlarmClock.EXTRA_SKIP_UI, true)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                handler.post { try { startActivity(i) } catch (e: Exception) { } }
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
 
         @JavascriptInterface
         fun vibrate(ms: Int) {
@@ -415,9 +697,13 @@ class OverlayService : Service() {
             try { wm.removeView(it) } catch (e: Exception) { }
             it.destroy()
         }
+        handler.removeCallbacks(reanudarRun)
+        wake?.detener()
+        wake = null
         tts?.stop()
         tts?.shutdown()
         tts = null
+        if (instance === this) instance = null
         view = null
         super.onDestroy()
     }
