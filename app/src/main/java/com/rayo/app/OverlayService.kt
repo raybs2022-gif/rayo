@@ -250,16 +250,17 @@ class OverlayService : Service() {
         d = dm.density
         sw = dm.widthPixels
         sh = dm.heightPixels
-        val size = (132 * d).toInt()
+        val ancho0 = (132 * d).toInt()
+        val alto0 = (160 * d).toInt()
         lp = WindowManager.LayoutParams(
-            size, size,
+            ancho0, alto0,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             FLAGS_COLLAPSED,
             PixelFormat.TRANSLUCENT
         )
         lp.gravity = Gravity.TOP or Gravity.START
-        lp.x = sw - size - (8 * d).toInt()
-        lp.y = sh - size - (140 * d).toInt()
+        lp.x = sw - ancho0 - (8 * d).toInt()
+        lp.y = sh - alto0 - (140 * d).toInt()
 
         val v = RayoWebView(this)
         v.setBackgroundColor(Color.TRANSPARENT)
@@ -627,10 +628,11 @@ class OverlayService : Service() {
             lp.flags = FLAGS_EXPANDED
             lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
         } else {
-            val s = (132 * d).toInt()
-            lp.width = s; lp.height = s
-            lp.x = savedX.coerceIn(0, max(0, sw - s))
-            lp.y = savedY.coerceIn(0, max(0, sh - s))
+            val sw0 = (132 * d).toInt()
+            val sh0 = (160 * d).toInt()
+            lp.width = sw0; lp.height = sh0
+            lp.x = savedX.coerceIn(0, max(0, sw - sw0))
+            lp.y = savedY.coerceIn(0, max(0, sh - sh0))
             lp.flags = FLAGS_COLLAPSED
         }
         expanded = open
